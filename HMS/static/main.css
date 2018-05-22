@@ -1,0 +1,8 @@
+body{ font-family: sans-serif;
+    background: url('static/img/back.png');
+}
+
+.hms{
+    width: 50px;
+    height: 50px;
+}

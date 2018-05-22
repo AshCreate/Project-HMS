@@ -11,11 +11,26 @@
     <title>Hello, world!</title>
   </head>
   <body>
-    <nav class="nav">
-      <a class="nav-link active" href="#">Home</a>
-      <a class="nav-link" href="#">Take a Tour</a>
-      <a class="nav-link" href="#">About</a>
-    </nav>
+    <!--Navigation Bar-->
+   <header class="site-header" style="background-image: url('static/img/back.png')">
+        <nav class="navbar navbar-expand-md sticky-top fixed-top">
+            <div class="container">
+                <img class="hms" src="static/img/HMS.png" />
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarToggle">
+        <!-- Navbar Right Side -->
+                    <div class="navbar-nav">
+                        <a class="nav-item nav-link" href="#">Home</a>
+                        <a class="nav-item nav-link" href="#">Take a Tour</a>
+                        <a class="nav-item nav-link" href="#">About</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
