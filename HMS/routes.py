@@ -8,4 +8,4 @@ from flask_login import login_user, current_user, logout_user, login_required
 @app.route("/")
 @app.route("/home")
 def home():
-    return render_template('EntryPagesLayout.html')
+    return render_template('Home.html')

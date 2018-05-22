@@ -13,6 +13,7 @@
 header{
     background-image: url('/static/img/back7.jpg');
     background-size: cover;
+    background-color: rgba(0, 0, 0, 0.7);
     height: 664px;
     text-align: center;
     color: white;
