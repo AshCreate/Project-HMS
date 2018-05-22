@@ -1,14 +1,22 @@
-header.masthead {
+/*header.masthead {
   padding-top: 10rem;
   padding-bottom: calc(10rem - 56px);
-  background-image:url('/static/img/back2.jpg');
+  background-image:url('/static/img/back7.jpg');
   background-position: center center;
+  height: 100%
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
 }
-
+*/
+header{
+    background-image: url('/static/img/back7.jpg');
+    background-size: cover;
+    height: 664px;
+    text-align: center;
+    color: white;
+}
 .icon{
     width:122px;
     height:68px;
