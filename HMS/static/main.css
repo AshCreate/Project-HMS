@@ -109,6 +109,11 @@ header{
     -moz-background-size: cover;
     -o-background-size: cover;
 }
+
+.navbar-custom {
+    background-color: rgba(0,0,0,0.7);
+}
+
 .icon{
     width:122px;
     height:68px;
