@@ -8,57 +8,35 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
     <link href="../static/main.css" rel="stylesheet">
-    <title>HMS</title>
+
+    <title>Login</title>
   </head>
-  <body>
-    <!--Nav Bar-->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+
+  <body id="registerbody">
+    <nav class="lnavbar navbar navbar-expand-lg navbar-dark navbar-fixed-top">
       <div class="container">
-        <img class="icon navbar-brand js-scroll-trigger" src="/static/img/whitelogo.png" alt="HMS icon" href="#page-top" >
-        <button class="navbar-toggler navbar-toggler-right " type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler navbar-transparent navbar-toggler-right " type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-              <a class="nav-link js-scroll-trigger text-white" href="#">Home</a>
+              <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('about') }}">About</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link js-scroll-trigger text-white" href="#">About</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link js-scroll-trigger text-white" href="#">Take a Tour</a>
+              <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('tour') }}">Take a Tour</a>
             </li>
             <li class="nav-item">
               <a class="nav-link js-scroll-trigger text-white" href="#">Sign Up</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link js-scroll-trigger text-white" href="#">Login</a>
+              <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('login') }}">Login</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
-
-    <!--login box-->
-    <div id="background">
-      <div class="loginbox">
-        <h1>Login</h1>
-        <form>
-          <p>Email</p>
-          <input type="text" name="" placeholder="Enter Email">
-          <p>Password</p>
-          <input type="password" name="" placeholder="Enter Password">
-          <input type="submit" name="" value="Login">
-          <a href="#">Forgotten Password</a>
-        </form>
-      </div>
-
-      <div id="signup">
-        <a>Dont have an account? </a><a href="#">Sign Up</a>
-      </div>
-
-    </div>
+    {% block content %}{%endblock%}
 
 
     <!-- Optional JavaScript -->

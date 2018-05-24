@@ -1,1 +1,24 @@
-{%extends "Home.html"%}
+{%extends "layout.html"%}
+{% block content %}
+    <div id="box">
+        <img src="/static/img/HMS-5.png" alt="HMS icon" href="#page-top" class="logo" >
+        <form>
+            <div>
+                <input type="text" name="" required="">
+                <label>E-mail</label>
+            </div>
+            <div>
+                <input type="password" name="" required="">
+                <label>Password</label>
+            </div>
+            <div>
+                <input type="submit" name="" required="" value="Login">
+            </div>
+        </form>
+    </div>
+    <div id="box2">
+        <a>Don't Have an Account? </a><a href="#">Sign Up</a>
+    </div>
+
+{% endblock %}
+
