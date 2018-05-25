@@ -15,7 +15,7 @@
   <body class="hbody">
     <nav class="navbar navbar-expand-lg navbar-dark navbar-fixed-top">
       <div class="container">
-        <img class="icon navbar-brand js-scroll-trigger" src="/static/img/whitelogo.png" alt="HMS icon" href="#page-top" >
+        <img class="icon navbar-brand js-scroll-trigger" src="/static/img/whitelogo.png" alt="HMS icon">
         <button class="navbar-toggler navbar-dark navbar-toggler-right " type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -28,7 +28,7 @@
               <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('tour') }}">Take a Tour</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link js-scroll-trigger text-white" href="#">Sign Up</a>
+              <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('signup')}}">Sign Up</a>
             </li>
             <li class="nav-item">
               <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('login') }}">Login</a>
@@ -42,6 +42,7 @@
       <div class="container my-auto">
         <div class="row">
           <div class="col-black mx-auto">
+            <br><br><br><br>
             <h1 class="text-uppercase">
               Welcome to Ashesi Hostel Management System<br>
               <strong>HMS</strong>
@@ -50,8 +51,8 @@
           </div>
           <div class="col-black mx-auto">
             <p class="text-white mb-5">A reliable service that helps hostels manage the day to day activities in the respective hostels.<br>And also help students secure and leave rooms/hostels to other ones</p>
-            <a class="btn btn-primary btn-xl js-scroll-trigger" href="#">Register Now</a><br><br>
-            <a>Already Have An Account? </a><a id="login" href="#">Login Here</a>
+            <a class="btn btn-primary btn-xl js-scroll-trigger" href="{{ url_for('signup')}}">Register Now</a><br><br>
+            <a>Already Have An Account? </a><a id="login" href="{{ url_for('login')}}">Login Here</a>
           </div>
         </div>
       </div>
