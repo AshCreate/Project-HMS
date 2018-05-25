@@ -11,8 +11,8 @@ class SignupForm(FlaskForm):
     lastname = StringField('Last Name', validators=[DataRequired(), Length(min=3, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     number = StringField('Phone Number', validators=[DataRequired(), Length(min=10, max=10)])
-    gender = SelectField('Gender', choices = [('M', 'Male'),
-   ('F', 'Female')])
+    gender = SelectField('Gender', choices=[('M', 'Male'),
+                                            ('F', 'Female')])
     password = PasswordField('Password', validators=[DataRequired()])
     cpassword = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
@@ -20,7 +20,12 @@ class SignupForm(FlaskForm):
     def validate_email(self, email):
         student = studentUser.query.filter_by(email=email.data).first()
         if student:
-            raise ValidationError('Acoount with this email already exists')
+            raise ValidationError('Account with this email already exists')
+
+    def validate_number(self, number):
+        student = studentUser.query.filter_by(number=number.data).first()
+        if student:
+            raise ValidationError('Student with this number already exists')
 
 
 class LoginForm(FlaskForm):
