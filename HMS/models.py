@@ -20,3 +20,30 @@ class studentUser(db.Model, UserMixin):
 
     def __repr__(self):
         return f"User('{self.firstname}', '{self.lastname}', '{self.email}')"
+
+
+class room(db.Model, UserMixin):
+    room_num = db.Column(db.Integer, primary_key=True)
+    beds = db.Column(db.Integer, nullable=False)
+    hostel = db.Column(db.String(30), nullable=False)
+
+    def __repr__(self):
+        return f"User('{self.firstname}', '{self.lastname}', '{self.email}')"
+
+
+class hostel(db.Model, UserMixin):
+    hostel_id = db.Column(db.Integer, primary_key=True)
+    hostel_name = db.Column(db.String(30), unique=True)
+
+    def __repr__(self):
+        return f"User('{self.firstname}', '{self.lastname}', '{self.email}')"
+
+
+class admin(db.Model, UserMixin):
+    admin_id = db.Column(db.Integer, primary_key=True)
+    admin_name = db.Column(db.String(30), primary_key=True)
+    admin_email = db.Column(db.String(120), unique=True, nullable=False)
+    admin_number = db.Column(db.String(10), unique=True, nullable=False)
+
+    def __repr__(self):
+        return f"User('{self.firstname}', '{self.lastname}', '{self.email}')"
