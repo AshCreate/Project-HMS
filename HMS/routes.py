@@ -54,3 +54,7 @@ def about():
 @app.route("/tour")
 def tour():
     return render_template('tour.html', title="Take A Tour", tourContent=tourContent)
+
+@app.route("/admin")
+def admin():
+    return render_template('admin_layout.html')
