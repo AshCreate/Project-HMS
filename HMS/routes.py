@@ -5,7 +5,7 @@ from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
 from HMS.models import studentUser
 from HMS.static.tourcontent import tourContent
-from HMS.forms import SignupForm, LoginForm
+from HMS.forms import SignupForm, LoginForm, AnnouncementForm
 from flask_mail import Message
 
 
@@ -57,4 +57,5 @@ def tour():
 
 @app.route("/admin")
 def admin():
-    return render_template('admin_layout.html')
+    form = AnnouncementForm()
+    return render_template('admin_layout.html', form = form)

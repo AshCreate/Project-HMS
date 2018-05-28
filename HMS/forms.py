@@ -33,3 +33,8 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
+
+class AnnouncementForm(FlaskForm):
+    subject = StringField('Subject', validators=[DataRequired()])
+    message = TextAreaField('Message', validators= [DataRequired()])
+    submit = SubmitField('Send')
