@@ -53,12 +53,13 @@
 
     <main role = "main" class="container">
         <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-9">
                 {% block content %}
                 {% endblock %}
             </div>
-            <div class="col-md-4" style="padding-top: 100px">
-                <h3>Announcements</h3>
+
+            <div class="col-md-3" style="margin-top: 120px;padding: 20px; background: #E6E6E6;border-radius: 10px;box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+                <legend class="border-bottom mb-4">Announcements</legend>
                 <fieldset class="form-group">
                     <div class="form-group">
                         {{ form.subject.label(class="form-control-label") }}

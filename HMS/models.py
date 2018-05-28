@@ -19,31 +19,43 @@ class studentUser(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
 
     def __repr__(self):
-        return f"User('{self.firstname}', '{self.lastname}', '{self.email}')"
+        return f"Student('{self.firstname}', '{self.lastname}', '{self.email}')"
 
 
-class room(db.Model, UserMixin):
+class room(db.Model):
     room_num = db.Column(db.Integer, primary_key=True)
     beds = db.Column(db.Integer, nullable=False)
     hostel = db.Column(db.String(30), nullable=False)
 
     def __repr__(self):
-        return f"User('{self.firstname}', '{self.lastname}', '{self.email}')"
+        return f"Room('{self.room_num}', '{self.beds}', '{self.hostel}')"
 
 
-class hostel(db.Model, UserMixin):
+class hostel(db.Model):
     hostel_id = db.Column(db.Integer, primary_key=True)
     hostel_name = db.Column(db.String(30), unique=True)
 
     def __repr__(self):
-        return f"User('{self.firstname}', '{self.lastname}', '{self.email}')"
+        return f"Hostel('{self.hostel_id}', '{self.hostel_name}')"
 
 
 class admin(db.Model, UserMixin):
     admin_id = db.Column(db.Integer, primary_key=True)
-    admin_name = db.Column(db.String(30), primary_key=True)
+    admin_firstname = db.Column(db.String(30), primary_key=True)
+    admin_lastname = db.Column(db.String(30), primary_key=True)
     admin_email = db.Column(db.String(120), unique=True, nullable=False)
     admin_number = db.Column(db.String(10), unique=True, nullable=False)
+    password = db.Column(db.String(60), nullable=False)
 
     def __repr__(self):
-        return f"User('{self.firstname}', '{self.lastname}', '{self.email}')"
+        return f"Admin('{self.admin_name}', '{self.admin_number}')"
+
+
+#class room_occupants(db.Model):
+ #   room_num = db.Column(db.Integer)
+  #  student_id = db.Column(db.String(30))
+    # we would have to check with the counter to make sure the number of people added to the room are less than the number of beds in the room
+   # counter = db.Column(db.Integer)
+
+    #def __repr__(self):
+     #   return f"Occupant('{self.room_id}')"
