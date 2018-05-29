@@ -5,8 +5,7 @@ from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
 from HMS.models import studentUser
 from HMS.static.tourcontent import tourContent
-from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, ItemTable
-from flask_mail import Message
+from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm
 
 rooms = [
     {"name": "GF1", "beds": 2}, {"name": "GF2", "beds": 4}, {"name": "GF3", "beds": 3},
@@ -35,6 +34,12 @@ def login():
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
+
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
 
 
 @app.route("/signup", methods=['GET', 'POST'])
@@ -86,7 +91,6 @@ def editroom():
     persons = [dict(name='Name1', paid=2600, remain=1000, action='none'),
                dict(name='Name2', paid=2600, remain=1000, action='none'),
                dict(name='Name3', paid=2600, remain=1000, action='none'),
-               dict(name='Name4', paid=2600, remain=1000, action='none'),
                dict(name='Name4', paid=2600, remain=1000, action='none')]
 
     return render_template('editroom.html', title='Add Room',
@@ -120,3 +124,24 @@ def occupants_details():
 def viewrooms():
     form2 = AnnouncementForm()
     return render_template('view_rooms.html', form2=form2, rooms=rooms)
+
+
+@app.route("/admin/account", methods=['GET', 'POST'])
+@login_required
+def updateaccount():
+    form = UpdateAccountForm()
+    form2 = AnnouncementForm()
+    if form.validate_on_submit():
+        current_user.firstname = form.firstname.data
+        current_user.lastname = form.lastname.data
+        current_user.number = form.number.data
+        current_user.email = form.email.data
+        db.session.commit()
+        flash('Your account has been updated!', 'success')
+        return redirect(url_for('updateaccount'))
+    elif request.method == 'GET':
+        form.firstname.data = current_user.firstname
+        form.lastname.data = current_user.lastname
+        form.number.data = current_user.number
+        form.email.data = current_user.email
+    return render_template('updateaccount.html', title='Account', form=form, form2=form2)

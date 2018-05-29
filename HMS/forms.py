@@ -11,7 +11,7 @@ class SignupForm(FlaskForm):
     firstname = StringField('First Name', validators=[DataRequired(), Length(min=3, max=20)])
     lastname = StringField('Last Name', validators=[DataRequired(), Length(min=3, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    number = StringField('Phone Number', validators=[DataRequired(), Length(min=10, max=10)])
+    number = StringField('Phone Number', validators=[DataRequired(), Length(min=9, max=20)])
     gender = SelectField('Gender', choices=[('M', 'Male'),
                                             ('F', 'Female')])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -51,13 +51,6 @@ class AddRoomForm(FlaskForm):
     submit = SubmitField('Add Room')
 
 
-class ItemTable(Table):
-    name = Col('Name')
-    paid = Col('Amount Paid')
-    remain = Col('Amount Remaining')
-    action = Col('Action')
-
-
 class EditRoomForm(FlaskForm):
     room_num = StringField('Room Number', validators=[DataRequired()])
     beds = SelectField('Number of occupants allowed', choices=[(1, 'One in a room'),
@@ -65,3 +58,27 @@ class EditRoomForm(FlaskForm):
                                                                (3, 'Three in a room'),
                                                                (4, 'Four in a room')])
     submit = SubmitField('Update Room')
+
+
+class UpdateAccountForm(FlaskForm):
+    firstname = StringField('Firstname',
+                            validators=[DataRequired(), Length(min=2, max=20)])
+    lastname = StringField('Lastname',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+    number = StringField('Phone Number',
+                         validators=[DataRequired(), Length(min=9, max=20)])
+    email = StringField('Email',
+                        validators=[DataRequired(), Email()])
+    submit = SubmitField('Update')
+
+    def validate_number(self, number):
+        if number.data != current_user.number:
+            user = studentUser.query.filter_by(number=number.data).first()
+            if user:
+                raise ValidationError('That number is taken.')
+
+    def validate_email(self, email):
+        if email.data != current_user.email:
+            user = studentUser.query.filter_by(email=email.data).first()
+            if user:
+                raise ValidationError('That email is taken. Please choose a different one.')
