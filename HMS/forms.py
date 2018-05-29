@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from HMS.models import studentUser
 from flask_login import current_user
@@ -48,6 +48,7 @@ class AddRoomForm(FlaskForm):
                                                                (2, 'Two in a room'),
                                                                (3, 'Three in a room'),
                                                                (4, 'Four in a room')])
+    price = IntegerField('Price', validators=[DataRequired()])
     submit = SubmitField('Add Room')
 
 
@@ -57,6 +58,7 @@ class EditRoomForm(FlaskForm):
                                                                (2, 'Two in a room'),
                                                                (3, 'Three in a room'),
                                                                (4, 'Four in a room')])
+    price = IntegerField('Price', validators=[DataRequired()])
     submit = SubmitField('Update Room')
 
 
