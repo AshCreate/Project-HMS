@@ -1,147 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
-    <link href="../static/main.css" rel="stylesheet">
-
-    {% if title %}
-        <title>HMS - {{ title }}</title>
-    {% else %}
-        <title>HMS</title>
-    {% endif %}
-
-<body>
-    <header>
-        <!--Navigation Bar-->
-        <nav class="navbar navbar-expand-lg navbar-light navbar-fixed-top" id="mainNav">
-            <div class="container">
-                <a href="/"> <img class="icon navbar-brand js-scroll-trigger" src="/static/img/whitelogo.png" alt="HMS icon" href="{{ url_for('home') }}"> </a>
-                <button class="navbar-toggler navbar-dark navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-                  <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarResponsive">
-
-                    <!-- Navbar Right Side -->
-                    <ul class="navbar-nav ml-auto">
-
-                        <li class="nav-item">
-                          <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('home')}}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link js-scroll-trigger text-white" href="#">Room Details</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link js-scroll-trigger text-white" href="#">Occupant Details</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link js-scroll-trigger text-white" href="#">Reports</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link js-scroll-trigger text-white" href="#">Account</a>
-                        </li>
-
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <main role = "main" class="container">
-        <div class="row">
-            <div class="col-md-9">
-                <div style="margin-top: 100px; padding: 25px;" >
-                    <form method = "POST" action = "" >
-                        {{form.hidden_tag()}}
-                        <fieldset class = "form-group" >
-                            <legend class = "border-bottom mb-4" > {{legend}} </legend>
-                            <div class="form-group">
-                                {{form.room_num.label(class="form-control-label")}}
-                                {% if form.room_num.errors %}
-                                    {{form.room_num(class="form-control form-control-lg is-invalid")}}
-                                    <div class = "invalid-feedback">
-                                        {% for error in form.room_num.errors %}
-                                            <span> {{error}}</span>
-                                        {%endfor%}
-                                    </div>
-                                {%else%}
-                                    {{form.room_num(class="form-control form-control-lg")}}
-                                {%endif%}
-                            </div>
-                            <div class = "form-group" >
-                                {{form.beds.label(class="form-control-label")}}
-                                {%if form.beds.errors%}
-                                    {{form.beds(class="form-control form-control-lg is-invalid")}}
-                                    <div class = "invalid-feedback">
-                                        {%for error in form.beds.errors%}
-                                            <span> {{error}} </span>
-                                        {%endfor%}
-                                    </div>
-                                {%else%}
-                                    {{form.beds(class="form-control form-control-lg")}}
-                                {% endif%}
-                            </div>
-                            <div class = "form-group" >
-                                {{table}}
-                            </div>
-                        </fieldset>
-                        <div class = "form-group">
-                            {{form.submit(class="btn btn-outline-info")}}
+{% extends "admin_layout.html" %}
+{% block content %}
+    <div style="margin-top: 100px; padding: 25px;" >
+        <form method = "POST" action = "" >
+            {{form.hidden_tag()}}
+            <fieldset class = "form-group" >
+                <legend class = "border-bottom mb-4" > {{legend}} </legend>
+                <div class="form-group">
+                    {{form.room_num.label(class="form-control-label")}}
+                    {% if form.room_num.errors %}
+                        {{form.room_num(class="form-control form-control-lg is-invalid")}}
+                        <div class = "invalid-feedback">
+                            {% for error in form.room_num.errors %}
+                                <span> {{error}}</span>
+                            {%endfor%}
                         </div>
-                    </form>
+                    {%else%}
+                        {{form.room_num(class="form-control form-control-lg")}}
+                    {%endif%}
                 </div>
+                <div class = "form-group" >
+                    {{form.beds.label(class="form-control-label")}}
+                    {%if form.beds.errors%}
+                        {{form.beds(class="form-control form-control-lg is-invalid")}}
+                        <div class = "invalid-feedback">
+                            {%for error in form.beds.errors%}
+                                <span> {{error}} </span>
+                            {%endfor%}
+                        </div>
+                    {%else%}
+                        {{form.beds(class="form-control form-control-lg")}}
+                    {% endif%}
+                </div>
+                <div class = "form-group" >
+                    {{table}}
+                </div>
+            </fieldset>
+            <div class = "form-group">
+                {{form.submit(class="btn btn-outline-info")}}
             </div>
-
-            <div class="col-md-3" style="margin-top: 120px;padding: 20px; background: #E6E6E6;border-radius: 10px;box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
-                <legend class="border-bottom mb-4">Announcements</legend>
-                <fieldset class="form-group">
-                    <div class="form-group">
-                        {{ form2.subject.label(class="form-control-label") }}
-                        {% if form2.subject.errors %}
-                            {{ form2.subject(class="form-control form-control-lg is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in form2.subject.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {{ form2.subject(class="form-control form-control-lg") }}
-                        {% endif %}
-                    </div>
-                    <div class="form-group">
-                        {{ form2.message.label(class="form-control-label") }}
-                            {% if form2.message.errors %}
-                                {{ form2.message(class="form-control form-control-lg is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form2.message.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form2.message(class="form-control form-control-lg") }}
-                            {% endif %}
-                    </div>
-                    <div class="form-group">
-                        {{ form2.submit(class="btn btn-outline-info") }}
-                    </div>
-                </fieldset>
-          </div>
-        </div>
-        </div>
-    </main>
-
-
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-</body>
-
-
-
-</html>
+        </form>
+    </div>
+{% endblock content%}

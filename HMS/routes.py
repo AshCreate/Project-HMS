@@ -58,9 +58,9 @@ def tour():
 
 @app.route("/admin")
 @login_required
-def admin():
+def admin_home():
     form = AnnouncementForm()
-    return render_template('admin_layout.html', form=form)
+    return render_template('admin_home.html', form2=form)
 
 
 @app.route("/admin/addroom")
@@ -85,3 +85,11 @@ def editroom():
 
     return render_template('editroom.html', title='Add Room',
                            form=form, form2=form2, legend='Edit Room', table=table)
+
+
+@app.route("/admin/occupants_details")
+@login_required
+def occupants_details():
+    form = AnnouncementForm()
+    return render_template('occupants_details.html', title='Add Room',
+                           form2=form, legend='Add New Room')

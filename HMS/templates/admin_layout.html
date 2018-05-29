@@ -30,19 +30,30 @@
                     <ul class="navbar-nav ml-auto">
 
                         <li class="nav-item">
-                          <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('home')}}">Home</a>
+                          <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('admin_home')}}">Home</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Room Details</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#">View Rooms</a>
+                                <a class="dropdown-item" href="{{ url_for('addroom')}}">Add Rooms</a>
+                                <a class="dropdown-item" href="{{ url_for('editroom')}}">Edit Rooms</a>
+                            </div>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link js-scroll-trigger text-white" href="#">Room Details</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link js-scroll-trigger text-white" href="#">Occupant Details</a>
+                          <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('occupants_details') }}">Occupant Details</a>
                         </li>
                         <li class="nav-item">
                           <a class="nav-link js-scroll-trigger text-white" href="#">Reports</a>
                         </li>
-                        <li class="nav-item">
-                          <a class="nav-link js-scroll-trigger text-white" href="#">Account</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Account</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#">Edit Admin Details</a>
+                                <a class="dropdown-item" href="#">Edit Hostel Details</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">Logout</a>
+                            </div>
                         </li>
 
                     </ul>
