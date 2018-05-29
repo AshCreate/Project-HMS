@@ -58,4 +58,4 @@ def tour():
 @app.route("/admin")
 def admin():
     form = AnnouncementForm()
-    return render_template('admin_layout.html', form = form)
+    return render_template('admin_home.html', form = form)
