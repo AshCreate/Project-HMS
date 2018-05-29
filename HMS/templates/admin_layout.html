@@ -35,7 +35,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Room Details</a>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" href="#">View Rooms</a>
+                                <a class="dropdown-item" href="{{ url_for('viewrooms')}}">View Rooms</a>
                                 <a class="dropdown-item" href="{{ url_for('addroom')}}">Add Rooms</a>
                                 <a class="dropdown-item" href="{{ url_for('editroom')}}">Edit Rooms</a>
                             </div>
@@ -64,7 +64,7 @@
 
     <main role = "main" class="container">
         <div class="row">
-            <div class="col-md-9" style="margin-top: 120px">
+            <div class="col-md-9" style="margin-top: 100px">
                 {% block content %}
                 {% endblock %}
             </div>

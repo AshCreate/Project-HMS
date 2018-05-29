@@ -83,22 +83,36 @@ def addroom():
 def editroom():
     form = EditRoomForm()
     form2 = AnnouncementForm()
-    items = [dict(name='Name1', paid=2600, remain=1000, action='none'),
-             dict(name='Name2', paid=2600, remain=1000, action='none'),
-             dict(name='Name3', paid=2600, remain=1000, action='none')]
-    table = ItemTable(items)
-    table.border = True
+    persons = [dict(name='Name1', paid=2600, remain=1000, action='none'),
+               dict(name='Name2', paid=2600, remain=1000, action='none'),
+               dict(name='Name3', paid=2600, remain=1000, action='none'),
+               dict(name='Name4', paid=2600, remain=1000, action='none'),
+               dict(name='Name4', paid=2600, remain=1000, action='none')]
 
     return render_template('editroom.html', title='Add Room',
-                           form=form, form2=form2, legend='Edit Room', table=table)
+                           form=form, form2=form2, legend='Edit Room', persons=persons)
 
 
 @app.route("/admin/occupants_details")
 @login_required
 def occupants_details():
     form = AnnouncementForm()
+    persons = [dict(name='Name1', paid=2600, remain=1000, action='none'),
+               dict(name='Name2', paid=2600, remain=1000, action='none'),
+               dict(name='Name3', paid=2600, remain=1000, action='none'),
+               dict(name='Name4', paid=2600, remain=1000, action='none'),
+               dict(name='Name5', paid=2600, remain=1000, action='none'),
+               dict(name='Name6', paid=2600, remain=1000, action='none'),
+               dict(name='Name7', paid=2600, remain=1000, action='none'),
+               dict(name='Name8', paid=2600, remain=1000, action='none'),
+               dict(name='Name9', paid=2600, remain=1000, action='none'),
+               dict(name='Name10', paid=2600, remain=1000, action='none'),
+               dict(name='Name10', paid=2600, remain=1000, action='none'),
+               dict(name='Name10', paid=2600, remain=1000, action='none'),
+               dict(name='Name10', paid=2600, remain=1000, action='none'),
+               dict(name='Name10', paid=2600, remain=1000, action='none')]
     return render_template('occupants_details.html', title='Add Room',
-                           form2=form, legend='Add New Room')
+                           form2=form, persons=persons)
 
 
 @app.route("/admin/viewrooms")
