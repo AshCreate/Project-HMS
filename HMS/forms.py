@@ -4,6 +4,7 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextA
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from HMS.models import studentUser
 from flask_login import current_user
+from flask_table import Table, Col
 
 
 class SignupForm(FlaskForm):
@@ -34,7 +35,33 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
+
 class AnnouncementForm(FlaskForm):
     subject = StringField('Subject', validators=[DataRequired()])
-    message = TextAreaField('Message', validators= [DataRequired()])
+    message = TextAreaField('Message', validators=[DataRequired()])
     submit = SubmitField('Send')
+
+
+class AddRoomForm(FlaskForm):
+    room_num = StringField('Room Number', validators=[DataRequired()])
+    beds = SelectField('Number of occupants allowed', choices=[(1, 'One in a room'),
+                                                               (2, 'Two in a room'),
+                                                               (3, 'Three in a room'),
+                                                               (4, 'Four in a room')])
+    submit = SubmitField('Add Room')
+
+
+class ItemTable(Table):
+    name = Col('Name')
+    paid = Col('Amount Paid')
+    remain = Col('Amount Remaining')
+    action = Col('Action')
+
+
+class EditRoomForm(FlaskForm):
+    room_num = StringField('Room Number', validators=[DataRequired()])
+    beds = SelectField('Number of occupants allowed', choices=[(1, 'One in a room'),
+                                                               (2, 'Two in a room'),
+                                                               (3, 'Three in a room'),
+                                                               (4, 'Four in a room')])
+    submit = SubmitField('Update Room')

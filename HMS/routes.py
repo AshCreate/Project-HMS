@@ -5,7 +5,7 @@ from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
 from HMS.models import studentUser
 from HMS.static.tourcontent import tourContent
-from HMS.forms import SignupForm, LoginForm, AnnouncementForm
+from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, ItemTable
 from flask_mail import Message
 
 
@@ -55,7 +55,33 @@ def about():
 def tour():
     return render_template('tour.html', title="Take A Tour", tourContent=tourContent)
 
+
 @app.route("/admin")
+@login_required
 def admin():
     form = AnnouncementForm()
-    return render_template('admin_layout.html', form = form)
+    return render_template('admin_layout.html', form=form)
+
+
+@app.route("/admin/addroom")
+@login_required
+def addroom():
+    form = AddRoomForm()
+    form2 = AnnouncementForm()
+    return render_template('addroom.html', title='Add Room',
+                           form=form, form2=form2, legend='Add New Room')
+
+
+@app.route("/admin/editroom")
+@login_required
+def editroom():
+    form = EditRoomForm()
+    form2 = AnnouncementForm()
+    items = [dict(name='Name1', paid=2600, remain=1000, action='none'),
+             dict(name='Name2', paid=2600, remain=1000, action='none'),
+             dict(name='Name3', paid=2600, remain=1000, action='none')]
+    table = ItemTable(items)
+    table.border = True
+
+    return render_template('editroom.html', title='Add Room',
+                           form=form, form2=form2, legend='Edit Room', table=table)
