@@ -19,12 +19,12 @@ class SignupForm(FlaskForm):
     submit = SubmitField('Sign Up')
 
     def validate_email(self, email):
-        student = studentUser.query.filter_by(email=email.data).first()
+        student = User.query.filter_by(email=email.data).first()
         if student:
             raise ValidationError('Account with this email already exists')
 
     def validate_number(self, number):
-        student = studentUser.query.filter_by(number=number.data).first()
+        student = User.query.filter_by(number=number.data).first()
         if student:
             raise ValidationError('Student with this number already exists')
 
@@ -75,12 +75,12 @@ class UpdateAccountForm(FlaskForm):
 
     def validate_number(self, number):
         if number.data != current_user.number:
-            user = studentUser.query.filter_by(number=number.data).first()
+            user = User.query.filter_by(number=number.data).first()
             if user:
                 raise ValidationError('That number is taken.')
 
     def validate_email(self, email):
         if email.data != current_user.email:
-            user = studentUser.query.filter_by(email=email.data).first()
+            user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('That email is taken. Please choose a different one.')
