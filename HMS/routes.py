@@ -8,6 +8,12 @@ from HMS.static.tourcontent import tourContent
 from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, ItemTable
 from flask_mail import Message
 
+rooms = [
+    {"name": "GF1", "beds": 2}, {"name": "GF2", "beds": 4}, {"name": "GF3", "beds": 3},
+    {"name": "FF1", "beds": 1}, {"name": "FF2", "beds": 4}, {"name": "FF3", "beds": 2},
+    {"name": "SF1", "beds": 3},
+]
+
 
 @app.route("/")
 @app.route("/home")
@@ -58,9 +64,9 @@ def tour():
 
 @app.route("/admin")
 @login_required
-def admin_home():
-    form = AnnouncementForm()
-    return render_template('admin_home.html', form2=form)
+def admin():
+    form2 = AnnouncementForm()
+    return render_template('admin_home.html', form2=form2)
 
 
 @app.route("/admin/addroom")
@@ -93,3 +99,10 @@ def occupants_details():
     form = AnnouncementForm()
     return render_template('occupants_details.html', title='Add Room',
                            form2=form, legend='Add New Room')
+
+
+@app.route("/admin/viewrooms")
+@login_required
+def viewrooms():
+    form2 = AnnouncementForm()
+    return render_template('view_rooms.html', form2=form2, rooms=rooms)

@@ -30,7 +30,7 @@
                     <ul class="navbar-nav ml-auto">
 
                         <li class="nav-item">
-                          <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('admin_home')}}">Home</a>
+                          <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('admin')}}">Home</a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Room Details</a>
@@ -69,42 +69,42 @@
                 {% endblock %}
             </div>
 
-            <div class="col-md-3" style="margin-top: 120px;padding: 20px; background: #E6E6E6;border-radius: 10px;box-shadow: 0 10px 20px rgba(0,0,0,0.2); width: fit-content;height: 400px">
-
-                <legend class="border-bottom mb-4">Announcements</legend>
-                <fieldset class="form-group">
-                    <div class="form-group">
-                        {{ form2.subject.label(class="form-control-label") }}
-                        {% if form2.subject.errors %}
-                            {{ form2.subject(class="form-control form-control-lg is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in form2.subject.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {{ form2.subject(class="form-control form-control-lg") }}
-                        {% endif %}
-                    </div>
-                    <div class="form-group">
-                        {{ form2.message.label(class="form-control-label") }}
-                            {% if form2.message.errors %}
-                                {{ form2.message(class="form-control form-control-lg is-invalid") }}
+             <div class="col-md-3">
+                <div style="margin-top: 120px;padding: 20px; background: #E6E6E6;border-radius: 10px;box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+                    <legend class="border-bottom mb-4">Announcements</legend>
+                    <fieldset class="form-group">
+                        <div class="form-group">
+                            {{ form2.subject.label(class="form-control-label") }}
+                            {% if form2.subject.errors %}
+                                {{ form2.subject(class="form-control form-control-lg is-invalid") }}
                                 <div class="invalid-feedback">
-                                    {% for error in form2.message.errors %}
+                                    {% for error in form2.subject.errors %}
                                         <span>{{ error }}</span>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                {{ form2.message(class="form-control form-control-lg") }}
+                                {{ form2.subject(class="form-control form-control-lg") }}
                             {% endif %}
-                    </div>
-                    <div class="form-group">
-                        {{ form2.submit(class="btn btn-outline-info") }}
-                    </div>
-                </fieldset>
+                        </div>
+                        <div class="form-group">
+                            {{ form2.message.label(class="form-control-label") }}
+                                {% if form2.message.errors %}
+                                    {{ form2.message(class="form-control form-control-lg is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form2.message.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form2.message(class="form-control form-control-lg") }}
+                                {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form2.submit(class="btn btn-outline-info") }}
+                        </div>
+                    </fieldset>
+                </div>
           </div>
-        </div>
         </div>
     </main>
 
