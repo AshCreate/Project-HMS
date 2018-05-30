@@ -180,3 +180,10 @@ def updateaccount():
     form.number.data = current_user.number
     form.email.data = current_user.email
   return render_template('updateaccount.html', title='Account', form=form, form2=form2)
+
+@app.route('/admin/reports')
+@login_required
+def reports():
+  form2 = AnnouncementForm()
+  hostelName = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first().hostel_name
+  return render_template('reports.html', title = 'Reports', form2 = form2, hostelName = hostelName)
