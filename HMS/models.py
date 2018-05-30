@@ -37,7 +37,7 @@ class Room(db.Model):
     occupants = db.relationship('User', backref='room')
 
     def __repr__(self):
-        return f"Room('{self.room_num}', '{self.beds}', '{self.hostel_id.hostel_name}')"
+        return f"Room('{self.room_num}', '{self.beds}', '{self.hostel_id}')"
 
 
 class Hostel(db.Model):
