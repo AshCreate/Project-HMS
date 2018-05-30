@@ -20,7 +20,7 @@ class User(db.Model, UserMixin):
     role = db.Column(db.String(10), nullable=False, default="student")
     password = db.Column(db.String(60), nullable=False)
     hostel_id = db.Column(db.Integer, db.ForeignKey('hostels.hostel_id'))
-    room_id = db.Column(db.Integer, db.ForeignKey('rooms.room_num'))
+    room_id = db.Column(db.String, db.ForeignKey('rooms.room_num'))
     images = db.relationship('Images', backref='user')
     announcements = db.relationship('Announcement', backref='user')
 
