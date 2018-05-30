@@ -3,7 +3,7 @@ import secrets
 from flask import render_template, url_for, flash, redirect, request, abort
 from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
-from HMS.models import User
+from HMS.models import User, Room, Hostel, Payment, Images, Announcement
 from HMS.static.tourcontent import tourContent
 from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm
 
@@ -81,16 +81,26 @@ def admin():
   return render_template('admin_home.html', form2=form2)
 
 
-@app.route("/admin/addroom")
+@app.route("/admin/addroom", methods=['GET', 'POST'])
 @login_required
 def addroom():
   form = AddRoomForm()
   form2 = AnnouncementForm()
+  if form.validate_on_submit():
+    room_num = form.room_num.data
+    beds = form.beds.data
+    price = form.price.data
+    room = Room(room_num=room_num, beds=beds, price=price, hostel_id=current_user.hostel_id)
+    db.session.add(room)
+    db.session.commit()
+    flash('Room successfully added', 'success')
+    return redirect(url_for('addroom'))
+
   return render_template('addroom.html', title='Add Room',
                          form=form, form2=form2, legend='Add New Room')
 
 
-@app.route("/admin/editroom")
+@app.route("/admin/editroom", methods=['GET', 'POST'])
 @login_required
 def editroom():
   form = EditRoomForm()
@@ -104,7 +114,7 @@ def editroom():
                          form=form, form2=form2, legend='Edit Room', persons=persons)
 
 
-@app.route("/admin/occupants_details")
+@app.route("/admin/occupants_details", methods=['GET'])
 @login_required
 def occupants_details():
   form = AnnouncementForm()
@@ -126,7 +136,7 @@ def occupants_details():
                          form2=form, persons=persons)
 
 
-@app.route("/admin/viewrooms")
+@app.route("/admin/viewrooms", methods=['GET'])
 @login_required
 def viewrooms():
   form2 = AnnouncementForm()
