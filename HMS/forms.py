@@ -53,7 +53,7 @@ class AddRoomForm(FlaskForm):
     submit = SubmitField('Add Room')
 
 
-class EditRoomForm(FlaskForm, current_user):
+class EditRoomForm(FlaskForm):
     room_num = SelectField('Number of occupants allowed', choices=[(1, 'One in a room'),
                                                                    (2, 'Two in a room'),
                                                                    (3, 'Three in a room'),
