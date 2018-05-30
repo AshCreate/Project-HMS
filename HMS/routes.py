@@ -3,15 +3,10 @@ import secrets
 from flask import render_template, url_for, flash, redirect, request, abort
 from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
-from HMS.models import User
+from HMS.models import User,Hostel, Payment, Room
 from HMS.static.tourcontent import tourContent
 from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm
 
-rooms = [
-    {"name": "GF1", "beds": 2}, {"name": "GF2", "beds": 4}, {"name": "GF3", "beds": 3},
-    {"name": "FF1", "beds": 1}, {"name": "FF2", "beds": 4}, {"name": "FF3", "beds": 2},
-    {"name": "SF1", "beds": 3},
-]
 
 
 @app.route("/")
@@ -78,7 +73,31 @@ def tour():
 @login_required
 def admin():
   form2 = AnnouncementForm()
-  return render_template('admin_home.html', form2=form2)
+  hostel = Hostel.query.filter_by(hostel_id = current_user.hostel_id).first()
+  hostelName = hostel.hostel_name
+  totalNumOfRooms = len(hostel.rooms)
+  totalNumofStudents = len(hostel.occupants)
+  totalNumOfMales = 0
+  totalNumOfFemales = 0
+  totalNumofFullyPaid = 0
+  for student in hostel.occupants:
+      if student.gender == 'M':
+          totalNumOfMales += 1
+      else:
+          totalNumOfFemales += 1
+
+  fullyOccupiedRooms = 0
+  for room in hostel.rooms:
+      if room.beds == len(room.occupants):
+          fullyOccupiedRooms += 1
+
+  for payment in Payment.query.all():
+      if payment.amount_remaining == 0:
+          totalNumofFullyPaid += 1
+  return render_template('admin_home.html', form2=form2, hostelName = hostelName, totalNumOfRooms = totalNumOfRooms,
+     totalNumofStudents = totalNumofStudents, fullyOccupiedRooms = fullyOccupiedRooms, totalNumOfFemales = totalNumOfFemales,
+   totalNumOfMales = totalNumOfMales, totalNumofFullyPaid = totalNumofFullyPaid)
+
 
 
 @app.route("/admin/addroom")
@@ -130,6 +149,7 @@ def occupants_details():
 @login_required
 def viewrooms():
   form2 = AnnouncementForm()
+  rooms = Room.query.filter_by(hostel_id = current_user.hostel_id).all()
   return render_template('view_rooms.html', form2=form2, rooms=rooms)
 
 
