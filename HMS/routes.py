@@ -7,7 +7,7 @@ from HMS.models import User, Hostel, Payment, Room
 from HMS.static.tourcontent import tourContent
 from HMS.static.reportContent import reportContent
 from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm
-from HMS.tables import TotalRoomReport, TotalStudentsReport
+from HMS.tables import TotalRoomReport, TotalStudentsReport, TotalFullPaidStudentsReport
 
 
 @app.route("/")
@@ -190,7 +190,7 @@ def reports():
   hostelName = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first().hostel_name
   return render_template('reports.html', title = 'Reports', form2 = form2, hostelName = hostelName, reportContent = reportContent)
 
-@app.route('/admin/reports/detailed_report/<id>')
+@app.route('/admin/reports/detailed_report/<string:id>')
 @login_required
 def detailed_report(id):
   form2 = AnnouncementForm()
@@ -201,6 +201,16 @@ def detailed_report(id):
   if(id == 'totStu'):
     table = TotalStudentsReport(hostel.occupants)
     return render_template('detailed_reports.html', table=table, form2=form2)
+  if(id == 'totStuPaid'):
+      table = TotalFullPaidStudentsReport(db.engine.execute("SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_remaining"+
+            " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining=0"))
+      return render_template('detailed_reports.html', table=table, form2=form2)
+  if (id == 'totNotFullPaid'):
+      table = TotalFullPaidStudentsReport(db.engine.execute(
+          "SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_remaining" +
+          " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining>0"))
+      return render_template('detailed_reports.html', table=table, form2=form2)
+
   if(id == 'totMaleStu'):
     table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'M' and role == 'student'"))
     return render_template('detailed_reports.html', table=table, form2=form2)
