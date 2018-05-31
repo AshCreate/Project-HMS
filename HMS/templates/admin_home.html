@@ -8,7 +8,7 @@
                 <p class="card-text">Total number of rooms in {{ hostelName }}</p>
               </div>
               <div class="card-action">
-                <a style="float: right" href="#">Full Details</a>
+                <a style="float: right" href="{{ url_for('detailed_report', id = 'totRooms') }}">Full Details</a>
               </div>
             </div>
 
@@ -18,7 +18,7 @@
                 <p class="card-text">Total number of students in {{ hostelName }}</p>
               </div>
               <div class="card-action">
-                <a style="float: right" href="#">Full Details</a>
+                <a style="float: right" href="{{ url_for('detailed_report', id = "totStu") }}">Full Details</a>
               </div>
             </div>
 
@@ -28,7 +28,7 @@
                 <p class="card-text">Total number of students who have fully paid</p>
               </div>
               <div class="card-action">
-                <a style="float: right" href="#">Full Details</a>
+                <a style="float: right" href="{{ url_for('detailed_report', id = "totStuPaid") }}">Full Details</a>
               </div>
             </div>
 
@@ -38,7 +38,7 @@
                 <p class="card-text">Total number of fully occupied rooms</p>
               </div>
               <div class="card-action">
-                <a style="float: right" href="#">Full Details</a>
+                <a style="float: right" href="{{ url_for('detailed_report', id = "totFullRooms") }}">Full Details</a>
               </div>
             </div>
 
@@ -48,7 +48,7 @@
                 <p class="card-text">Total number of males in {{ hostelName}}</p>
               </div>
               <div class="card-action">
-                <a style="float: right" href="#">Full Details</a>
+                <a style="float: right" href="{{ url_for('detailed_report', id = "totMaleStu") }}">Full Details</a>
               </div>
             </div>
 
@@ -58,7 +58,7 @@
                 <p class="card-text">Total number of females in {{ hostelName }}</p>
               </div>
               <div class="card-action">
-                <a style="float: right" href="#">Full Details</a>
+                <a style="float: right" href="{{ url_for('detailed_report', id = "totFemStu") }}">Full Details</a>
               </div>
             </div>
         </div>

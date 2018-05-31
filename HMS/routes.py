@@ -5,7 +5,9 @@ from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
 from HMS.models import User, Hostel, Payment, Room
 from HMS.static.tourcontent import tourContent
+from HMS.static.reportContent import reportContent
 from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm
+from HMS.tables import TotalRoomReport, TotalStudentsReport
 
 
 @app.route("/")
@@ -186,4 +188,31 @@ def updateaccount():
 def reports():
   form2 = AnnouncementForm()
   hostelName = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first().hostel_name
-  return render_template('reports.html', title = 'Reports', form2 = form2, hostelName = hostelName)
+  return render_template('reports.html', title = 'Reports', form2 = form2, hostelName = hostelName, reportContent = reportContent)
+
+@app.route('/admin/reports/detailed_report/<id>')
+@login_required
+def detailed_report(id):
+  form2 = AnnouncementForm()
+  hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
+  if(id == "totRooms"):
+    table = TotalRoomReport(hostel.rooms)
+    return render_template('detailed_reports.html', table = table, form2 = form2)
+  if(id == 'totStu'):
+    table = TotalStudentsReport(hostel.occupants)
+    return render_template('detailed_reports.html', table=table, form2=form2)
+  if(id == 'totMaleStu'):
+    table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'M' and role == 'student'"))
+    return render_template('detailed_reports.html', table=table, form2=form2)
+  if (id == 'totFemStu'):
+    table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'F' and role == 'student'"))
+    return render_template('detailed_reports.html', table=table, form2=form2)
+
+
+@app.route('/admin/viewrooms/room_details/<id>')
+@login_required
+def room_details(id):
+  form2 = AnnouncementForm()
+  room = Room.query.filter_by(room_num = id).first()
+  table = TotalStudentsReport(room.occupants)
+  return render_template('room_details.html', table=table, form2=form2)
