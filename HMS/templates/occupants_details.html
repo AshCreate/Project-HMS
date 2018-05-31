@@ -2,26 +2,7 @@
 {% block content %}
     <div class = "form-group" >
         <strong><legend>Students in hostel</legend></strong>
-        <table class="table table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Name</th>
-                    <th>Paid</th>
-                    <th>Remain</th>
-                    <th>Action</th>
-                <tr>
-            </thead>
-            <tbody>
-                {% for person in persons %}
-                <tr>
-                    <td>{{ person.name }}</td>
-                    <td>{{ person.paid }}</td>
-                    <td>{{ person.remain }}</td>
-                    <td>{{ person.action }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        {{table}}
     </div>
 
 

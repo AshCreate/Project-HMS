@@ -36,9 +36,8 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-dark" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Room Details</a>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" href="{{ url_for('viewrooms')}}">View Rooms</a>
+                                <a class="dropdown-item" href="{{ url_for('viewrooms')}}">View/Edit Rooms</a>
                                 <a class="dropdown-item" href="{{ url_for('addroom')}}">Add Rooms</a>
-                                <a class="dropdown-item" href="{{ url_for('editroom')}}">Edit Rooms</a>
                             </div>
                         </li>
                         <li class="nav-item">
@@ -67,8 +66,18 @@
     <main role = "main" class="container">
         <div class="row">
             <div class="col-md-9" style="margin-top: 100px">
-                {% block content %}
-                {% endblock %}
+                <div style="margin: 0;">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="flash alert alert-{{ category }}">
+                                  {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                {% block content %}{% endblock %}
             </div>
 
              <div class="col-md-3">

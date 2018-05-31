@@ -53,15 +53,11 @@ class AddRoomForm(FlaskForm):
 
 
 class EditRoomForm(FlaskForm):
-    room_num = SelectField('Number of occupants allowed', choices=[(1, 'One in a room'),
-                                                                   (2, 'Two in a room'),
-                                                                   (3, 'Three in a room'),
-                                                                   (4, 'Four in a room')])
+    room_num = StringField('Room Number', validators=[DataRequired()])
     beds = SelectField('Number of occupants allowed', choices=[(1, 'One in a room'),
                                                                (2, 'Two in a room'),
                                                                (3, 'Three in a room'),
-                                                               (4, 'Four in a room')])
-    price = IntegerField('Price', validators=[DataRequired()])
+                                                               (4, 'Four in a room')], coerce=int)
     submit = SubmitField('Update Room')
 
 

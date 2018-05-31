@@ -119,40 +119,28 @@ def addroom():
                          form=form, form2=form2, legend='Add New Room')
 
 
-@app.route("/admin/editroom", methods=['GET', 'POST'])
-@login_required
-def editroom():
-  form = EditRoomForm()
-  form2 = AnnouncementForm()
-  persons = [dict(name='Name1', paid=2600, remain=1000, action='none'),
-             dict(name='Name2', paid=2600, remain=1000, action='none'),
-             dict(name='Name3', paid=2600, remain=1000, action='none'),
-             dict(name='Name4', paid=2600, remain=1000, action='none')]
-
-  return render_template('editroom.html', title='Add Room',
-                         form=form, form2=form2, legend='Edit Room', persons=persons)
+#@app.route("/admin/editroom", methods=['GET', 'POST'])
+#@login_required
+#def editroom():
+#  form = EditRoomForm()
+#  form2 = AnnouncementForm()
+#  persons = [dict(name='Name1', paid=2600, remain=1000, action='none'),
+#             dict(name='Name2', paid=2600, remain=1000, action='none'),
+#             dict(name='Name3', paid=2600, remain=1000, action='none'),
+#            dict(name='Name4', paid=2600, remain=1000, action='none')]
+#
+#  return render_template('editroom.html', title='Add Room',
+#                         form=form, form2=form2, legend='Edit Room', persons=persons)
 
 
 @app.route("/admin/occupants_details", methods=['GET'])
 @login_required
 def occupants_details():
   form = AnnouncementForm()
-  persons = [dict(name='Name1', paid=2600, remain=1000, action='none'),
-             dict(name='Name2', paid=2600, remain=1000, action='none'),
-             dict(name='Name3', paid=2600, remain=1000, action='none'),
-             dict(name='Name4', paid=2600, remain=1000, action='none'),
-             dict(name='Name5', paid=2600, remain=1000, action='none'),
-             dict(name='Name6', paid=2600, remain=1000, action='none'),
-             dict(name='Name7', paid=2600, remain=1000, action='none'),
-             dict(name='Name8', paid=2600, remain=1000, action='none'),
-             dict(name='Name9', paid=2600, remain=1000, action='none'),
-             dict(name='Name10', paid=2600, remain=1000, action='none'),
-             dict(name='Name10', paid=2600, remain=1000, action='none'),
-             dict(name='Name10', paid=2600, remain=1000, action='none'),
-             dict(name='Name10', paid=2600, remain=1000, action='none'),
-             dict(name='Name10', paid=2600, remain=1000, action='none')]
-  return render_template('occupants_details.html', title='Add Room',
-                         form2=form, persons=persons)
+  hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
+  table = TotalStudentsReport(hostel.occupants)
+  return render_template('occupants_details.html', title='Occupants Details',
+                         form2=form, table=table)
 
 
 @app.route("/admin/viewrooms", methods=['GET'])
@@ -202,12 +190,12 @@ def detailed_report(id):
     table = TotalStudentsReport(hostel.occupants)
     return render_template('detailed_reports.html', table=table, form2=form2)
   if(id == 'totStuPaid'):
-      table = TotalFullPaidStudentsReport(db.engine.execute("SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_remaining"+
+      table = TotalFullPaidStudentsReport(db.engine.execute("SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining"+
             " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining=0"))
       return render_template('detailed_reports.html', table=table, form2=form2)
   if (id == 'totNotFullPaid'):
       table = TotalFullPaidStudentsReport(db.engine.execute(
-          "SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_remaining" +
+          "SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining" +
           " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining>0"))
       return render_template('detailed_reports.html', table=table, form2=form2)
 
@@ -219,10 +207,23 @@ def detailed_report(id):
     return render_template('detailed_reports.html', table=table, form2=form2)
 
 
-@app.route('/admin/viewrooms/room_details/<id>')
+@app.route('/admin/viewrooms/room_details/<id>', methods=['GET', 'POST'])
 @login_required
 def room_details(id):
+  global table
   form2 = AnnouncementForm()
+  form = EditRoomForm()
   room = Room.query.filter_by(room_num = id).first()
-  table = TotalStudentsReport(room.occupants)
-  return render_template('room_details.html', table=table, form2=form2)
+  if form.validate_on_submit():
+    room.room_num = form.room_num.data
+    room.beds = form.beds.data
+    db.session.commit()
+    form.room_num.data = room.room_num
+    form.beds.data = room.beds
+    flash('Room Sucessfully Updated!', 'success')
+    return redirect(url_for('room_details', id = room.room_num))
+  elif request.method == 'GET':
+    form.room_num.data = room.room_num
+    form.beds.data = room.beds
+    table = TotalStudentsReport(room.occupants)
+  return render_template('room_details.html', legend='Edit Room',form=form,form2=form2,table=table)
