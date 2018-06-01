@@ -77,14 +77,16 @@ def admin():
   hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
   hostelName = hostel.hostel_name
   totalNumOfRooms = len(hostel.rooms)
-  totalNumofStudents = len(hostel.occupants)
+  totalNumofStudents = 0
   totalNumOfMales = 0
   totalNumOfFemales = 0
   totalNumofFullyPaid = 0
   for student in hostel.occupants:
-    if student.gender == 'M':
+    if student.room_id != None:
+      totalNumofStudents += 1
+    if student.gender == 'M' and student.room_id != None:
       totalNumOfMales += 1
-    else:
+    elif student.gender == 'F' and student.room_id != None:
       totalNumOfFemales += 1
 
   fullyOccupiedRooms = 0
@@ -137,8 +139,7 @@ def addroom():
 @login_required
 def occupants_details():
   form = AnnouncementForm()
-  hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
-  table = TotalStudentsReport(hostel.occupants)
+  table = TotalStudentsReport(db.engine.execute("select * from Users where room_id not null"))
   return render_template('occupants_details.html', title='Occupants Details',
                          form2=form, table=table)
 
@@ -187,7 +188,7 @@ def detailed_report(id):
     table = TotalRoomReport(hostel.rooms)
     return render_template('detailed_reports.html', table = table, form2 = form2)
   if(id == 'totStu'):
-    table = TotalStudentsReport(hostel.occupants)
+    table = TotalStudentsReport(db.engine.execute("select * from Users where room_id not null"))
     return render_template('detailed_reports.html', table=table, form2=form2)
   if(id == 'totStuPaid'):
       table = TotalFullPaidStudentsReport(db.engine.execute("SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining"+
@@ -198,12 +199,14 @@ def detailed_report(id):
           "SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining" +
           " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining>0"))
       return render_template('detailed_reports.html', table=table, form2=form2)
-
+  if(id == 'totFullRooms'):
+    table = TotalRoomReport(db.engine.execute("Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num)"))
+    return  render_template('detailed_reports.html', table=table, form2=form2)
   if(id == 'totMaleStu'):
-    table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'M' and role == 'student'"))
+    table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'M' and room_id not null"))
     return render_template('detailed_reports.html', table=table, form2=form2)
   if (id == 'totFemStu'):
-    table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'F' and role == 'student'"))
+    table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'F' and room_id not null"))
     return render_template('detailed_reports.html', table=table, form2=form2)
 
 
