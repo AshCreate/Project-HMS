@@ -31,13 +31,24 @@ class User(db.Model, UserMixin):
 class Room(db.Model):
     __tablename__ = "rooms"
     room_num = db.Column(db.String, primary_key=True)
-    beds = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Integer, nullable=False)
+    beds = db.Column(db.String, db.ForeignKey('beds.beds_id'))
+    price = db.Column(db.Integer)
     hostel_id = db.Column(db.Integer, db.ForeignKey('hostels.hostel_id'))
     occupants = db.relationship('User', backref='room')
 
     def __repr__(self):
-        return f"Room('{self.room_num}', '{self.beds}', '{self.hostel_id}')"
+        return f"Room('{self.room_num}', '{self.hostel_id}')"
+
+
+class Beds(db.Model):
+    __tablename__ = "beds"
+    beds_id = db.Column(db.String, nullable=False, primary_key=True)
+    bednum = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Integer, nullable=False)
+    hostel_id = db.Column(db.Integer, db.ForeignKey('hostels.hostel_id'))
+
+    def __repr__(self):
+        return f"Beds('{self.bednum}', '{self.price}', '{self.hostel_id}')"
 
 
 class Hostel(db.Model):
@@ -46,6 +57,7 @@ class Hostel(db.Model):
     hostel_name = db.Column(db.String(30), unique=True)
     occupants = db.relationship('User', backref='hostel')
     rooms = db.relationship('Room', backref='hostel')
+    beds = db.relationship('Beds', backref='hostel')
 
     def __repr__(self):
         return f"Hostel('{self.hostel_id}', '{self.hostel_name}')"
