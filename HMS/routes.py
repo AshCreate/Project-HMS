@@ -6,7 +6,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from HMS.models import User, Hostel, Payment, Room,Beds
 from HMS.static.tourcontent import tourContent
 from HMS.static.reportContent import reportContent
-from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm
+from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm, EditRoomPricingForm
 from HMS.tables import TotalRoomReport, TotalStudentsReport, TotalFullPaidStudentsReport
 
 
@@ -90,8 +90,8 @@ def admin():
       totalNumOfFemales += 1
 
   fullyOccupiedRooms = 0
-  for room in hostel.rooms:
-    if room.beds == len(room.occupants):
+  occupied_rooms = db.engine.execute("Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num)")
+  for room in occupied_rooms:
       fullyOccupiedRooms += 1
 
   for payment in Payment.query.all():
@@ -124,20 +124,6 @@ def addroom():
 
   return render_template('addroom.html', title='Add Room',
                          form=form, form2=form2, legend='Add New Room')
-
-
-#@app.route("/admin/editroom", methods=['GET', 'POST'])
-#@login_required
-#def editroom():
-#  form = EditRoomForm()
-#  form2 = AnnouncementForm()
-#  persons = [dict(name='Name1', paid=2600, remain=1000, action='none'),
-#             dict(name='Name2', paid=2600, remain=1000, action='none'),
-#             dict(name='Name3', paid=2600, remain=1000, action='none'),
-#            dict(name='Name4', paid=2600, remain=1000, action='none')]
-#
-#  return render_template('editroom.html', title='Add Room',
-#                         form=form, form2=form2, legend='Edit Room', persons=persons)
 
 
 @app.route("/admin/occupants_details", methods=['GET'])
@@ -235,3 +221,22 @@ def room_details(id):
     form.beds.data = room.beds
     table = TotalStudentsReport(room.occupants)
   return render_template('room_details.html', legend='Edit Room',form=form,form2=form2,table=table)
+
+
+@app.route("/admin/editroompricing", methods=['GET', 'POST'])
+@login_required
+def editroompricing():
+  form2 = AnnouncementForm()
+  form = EditRoomPricingForm()
+  if form.validate_on_submit():
+     beds = form.beds.data
+     price = form.price.data
+     hostel_id = current_user.hostel_id
+     db.engine.execute("Update beds set price = "+ str(price) +" where beds.bednum = " + str(beds) +" and beds.hostel_id = " + str(hostel_id))
+     db.engine.execute(
+       "Update rooms set price = " + str(price) + " where rooms.beds = " + str(beds) + " and rooms.hostel_id = " + str(
+         hostel_id))
+     flash('Room Pricing have been updated', 'success')
+     return redirect(url_for('editroompricing'))
+
+  return render_template('edit_roompricing.html', form2 = form2, form = form, legend = "Edit Room Pricing")
