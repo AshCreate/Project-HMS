@@ -3,7 +3,7 @@ import secrets
 from flask import render_template, url_for, flash, redirect, request, abort
 from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
-from HMS.models import User, Hostel, Payment, Room
+from HMS.models import User, Hostel, Payment, Room,Beds
 from HMS.static.tourcontent import tourContent
 from HMS.static.reportContent import reportContent
 from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm
@@ -110,7 +110,12 @@ def addroom():
   if form.validate_on_submit():
     room_num = form.room_num.data
     beds = form.beds.data
-    price = form.price.data
+    hostel_id=current_user.hostel_id
+    hostel_name=Hostel.query.filter_by(hostel_id=hostel_id).first()
+    hostel_name=hostel_name.hostel_name.lower()
+    bed=f'{hostel_name}{beds}'
+    price = Beds.query.filter_by(beds_id=bed).first()
+    price=price.price
     room = Room(room_num=room_num, beds=beds, price=price, hostel_id=current_user.hostel_id)
     db.session.add(room)
     db.session.commit()

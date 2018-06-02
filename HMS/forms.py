@@ -44,11 +44,10 @@ class AnnouncementForm(FlaskForm):
 
 class AddRoomForm(FlaskForm):
     room_num = StringField('Room Number', validators=[DataRequired()])
-    beds = SelectField('Number of occupants allowed', choices=[(1, 'One in a room'),
-                                                               (2, 'Two in a room'),
-                                                               (3, 'Three in a room'),
-                                                               (4, 'Four in a room')], coerce=int)
-    price = IntegerField('Price', validators=[DataRequired()])
+    beds = SelectField('Number of occupants allowed', choices=[('1', 'One in a room'),
+                                                               ('2', 'Two in a room'),
+                                                               ('3', 'Three in a room'),
+                                                               ('4', 'Four in a room')])
     submit = SubmitField('Add Room')
 
 
