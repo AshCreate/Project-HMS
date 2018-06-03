@@ -1,4 +1,4 @@
-from flask_table import Table, Col
+from flask_table import Table, Col, ButtonCol
 
 
 class TotalRoomReport(Table):
@@ -40,3 +40,4 @@ class EditRoomStudentsReport(Table):
     number = Col('Phone No')
     amount_paid = Col('Amount Paid')
     amount_remaining = Col('Amount Remaining')
+

@@ -201,7 +201,16 @@ def detailed_report(id):
     return render_template('detailed_reports.html', table=table, form2=form2)
 
 
-@app.route('/admin/viewrooms/room_details/<id>', methods=['GET', 'POST'])
+@app.route('/admin/viewrooms/room_details/<string:id>')
+@login_required
+def default_roomview(id):
+  form2 = AnnouncementForm()
+  room = Room.query.filter_by(room_num=id).first()
+  table = TotalStudentsReport(room.occupants)
+  return render_template('default_roomview.html', room = room, form2 = form2, table = table)
+
+
+@app.route('/admin/viewrooms/room_details/<string:id>/update', methods=['GET', 'POST'])
 @login_required
 def room_details(id):
   global table
@@ -228,7 +237,23 @@ def room_details(id):
     form.room_num.data = room.room_num
     form.beds.data = room.beds
     table = TotalStudentsReport(room.occupants)
-  return render_template('room_details.html', legend='Edit Room',form=form,form2=form2,table=table)
+  return render_template('room_details.html', legend='Edit Room',form=form,form2=form2,table=table, room = room)
+
+
+@app.route('/admin/viewrooms/room_details/<string:id>/delete', methods=['POST'])
+@login_required
+def deleteroom(id):
+  hostel_id = current_user.hostel_id
+  room = Room.query.filter_by(room_num = id, hostel_id = hostel_id).first()
+  return_url = request.referrer
+  if len(room.occupants) > 0:
+    flash('Room cannot be deleted. Check if room is empty', 'danger')
+    return redirect(return_url)
+  else:
+    db.session.delete(room)
+    db.session.commit()
+    flash('Room has been deleted!','success')
+    return redirect(url_for('viewrooms'))
 
 
 @app.route("/admin/editroompricing", methods=['GET', 'POST'])
@@ -248,3 +273,5 @@ def editroompricing():
      return redirect(url_for('editroompricing'))
 
   return render_template('edit_roompricing.html', form2 = form2, form = form, legend = "Edit Room Pricing")
+
+
