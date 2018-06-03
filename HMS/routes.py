@@ -208,9 +208,17 @@ def room_details(id):
   form2 = AnnouncementForm()
   form = EditRoomForm()
   room = Room.query.filter_by(room_num = id).first()
+  hostel_id = current_user.hostel_id
+  hostel_name = Hostel.query.filter_by(hostel_id=hostel_id).first()
+  hostel_name = hostel_name.hostel_name.lower()
+
   if form.validate_on_submit():
     room.room_num = form.room_num.data
     room.beds = form.beds.data
+    beds = room.beds
+    bed=f'{hostel_name}{beds}'
+    price = Beds.query.filter_by(beds_id=bed).first()
+    room.price=price.price
     db.session.commit()
     form.room_num.data = room.room_num
     form.beds.data = room.beds
