@@ -6,7 +6,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from HMS.models import User, Hostel, Payment, Room,Beds
 from HMS.static.tourcontent import tourContent
 from HMS.static.reportContent import reportContent
-from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm, EditRoomPricingForm
+from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm, EditRoomPricingForm, AdminAddPaymentForm
 from HMS.tables import TotalRoomReport, TotalStudentsReport, TotalFullPaidStudentsReport
 
 
@@ -279,3 +279,9 @@ def editroompricing():
   return render_template('edit_roompricing.html', form2 = form2, form = form, legend = "Edit Room Pricing")
 
 
+@app.route('/admin/payments')
+@login_required
+def payments():
+    form2 = AnnouncementForm()
+    form = AdminAddPaymentForm()
+    return render_template('payments.html', form2 = form2, form = form)
