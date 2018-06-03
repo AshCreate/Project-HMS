@@ -237,8 +237,10 @@ def room_details(id):
 def deleteroom(id):
   hostel_id = current_user.hostel_id
   room = Room.query.filter_by(room_num = id, hostel_id = hostel_id).first()
+  return_url = request.referrer
   if len(room.occupants) > 0:
     flash('Room cannot be deleted. Check if room is empty', 'danger')
+    return redirect(return_url)
   else:
     db.session.delete(room)
     db.session.commit()
