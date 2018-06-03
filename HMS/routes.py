@@ -6,7 +6,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from HMS.models import User, Hostel, Payment, Room,Beds
 from HMS.static.tourcontent import tourContent
 from HMS.static.reportContent import reportContent
-from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm, EditRoomPricingForm
+from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm, EditRoomPricingForm, AdminAddPaymentForm
 from HMS.tables import TotalRoomReport, TotalStudentsReport, TotalFullPaidStudentsReport
 
 
@@ -23,21 +23,25 @@ def login():
   form = LoginForm()
   if form.validate_on_submit():
     user = User.query.filter_by(email=form.email.data).first()
-    if user.role == "student":
-      if user and bcrypt.check_password_hash(user.password, form.password.data):
-        login_user(user, remember=form.remember.data)
-        next_page = request.args.get('next')
-        return redirect(next_page) if next_page else redirect(url_for('login'))
-      else:
+    if user:
+      if user.role == "student":
+        if bcrypt.check_password_hash(user.password, form.password.data):
+          login_user(user, remember=form.remember.data)
+          next_page = request.args.get('next')
+          return redirect(next_page) if next_page else redirect(url_for('login'))
+        else:
+          flash('Login Unsuccessful. Please check email and password', 'danger')
+      if user.role == "admin":
+        if bcrypt.check_password_hash(user.password, form.password.data):
+          login_user(user, remember=form.remember.data)
+          return redirect(url_for('admin'))
+        else:
+          flash('Login Unsuccessful. Please check email and password', 'danger')
+    else:
         flash('Login Unsuccessful. Please check email and password', 'danger')
-    elif user.role == "admin":
-      if user and bcrypt.check_password_hash(user.password, form.password.data):
-        login_user(user, remember=form.remember.data)
-        return redirect(url_for('admin'))
-      else:
-        flash('Login Unsuccessful. Please check email and password', 'danger')
-  return render_template('login.html', title='Login', form=form)
 
+
+  return render_template('login.html', title='Login', form=form)
 
 @app.route("/logout")
 def logout():
@@ -275,3 +279,9 @@ def editroompricing():
   return render_template('edit_roompricing.html', form2 = form2, form = form, legend = "Edit Room Pricing")
 
 
+@app.route('/admin/payments')
+@login_required
+def payments():
+    form2 = AnnouncementForm()
+    form = AdminAddPaymentForm()
+    return render_template('payments.html', form2 = form2, form = form)

@@ -90,3 +90,7 @@ class EditRoomPricingForm(FlaskForm):
                                                                (4, 'Four in a room')], coerce=int)
     price = IntegerField('Price', validators=[DataRequired()])
     submit = SubmitField('Change Room Pricing')
+
+class AdminAddPaymentForm(FlaskForm):
+    price = IntegerField('Price', validators=[DataRequired()])
+    submit = SubmitField('Add Payment')
