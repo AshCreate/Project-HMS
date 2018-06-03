@@ -230,12 +230,12 @@ def room_details(id):
     room.price=price.price
     db.session.commit()
     form.room_num.data = room.room_num
-    form.beds.data = room.beds
+    form.beds.data = int(room.beds)
     flash('Room Sucessfully Updated!', 'success')
     return redirect(url_for('room_details', id = room.room_num))
   elif request.method == 'GET':
     form.room_num.data = room.room_num
-    form.beds.data = room.beds
+    form.beds.data = int(room.beds)
     table = TotalStudentsReport(room.occupants)
   return render_template('room_details.html', legend='Edit Room',form=form,form2=form2,table=table, room = room)
 
