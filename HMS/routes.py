@@ -280,15 +280,39 @@ def editroompricing():
   return render_template('edit_roompricing.html', form2 = form2, form = form, legend = "Edit Room Pricing")
 
 
-@app.route('/admin/payments', methods=['GET', 'POST'])
+@app.route('/admin/payments')
 @login_required
 def payments():
     #page = request.args.get('page', 1, type=int)
     form2 = AnnouncementForm()
-    form = AdminAddPaymentForm()
     payment = Images.query.filter_by(processed="False").order_by(Images.date_posted.desc()).all()#.paginate(page=page, per_page=6)
+    return render_template('payments.html', form2 = form2, payment=payment)
 
-    return render_template('payments.html', form2 = form2, form = form, payment=payment)
+@app.route('/admin/payments/<id>/input_payment', methods=['GET', 'POST'])
+@login_required
+def input_payment(id):
+  form = AdminAddPaymentForm()
+  form2 = AnnouncementForm()
+  image = Images.query.filter_by(image_id= id).first()
+  student_id = image.user_id
+  student = User.query.filter_by(id = student_id).first()
+  room = Room.query.filter_by(room_num = student.room_id).first()
+  room_price = room.price
+  if form.validate_on_submit():
+      if Payment.query.filter_by(user_id = student_id).order_by(Payment.payment_id.desc()).first():
+          prev_amountremaining = Payment.query.filter_by(user_id = student_id).order_by(Payment.payment_id.desc()).first()
+          input = Payment(user_id= student_id, amount_paid = form.price.data, amount_remaining= prev_amountremaining.amount_remaining - form.price.data)
+          db.session.add(input)
+          db.session.commit()
+      else:
+          input = Payment(user_id=student_id, amount_paid=form.price.data,
+                          amount_remaining=room_price - form.price.data)
+          db.session.add(input)
+          db.session.commit()
+
+  return render_template('input_payments.html', form2=form2, form=form,
+          legend = "Input Payment for " + student.firstname + " " + student.lastname )
+
 
 @app.route('/admin/changepassword', methods=['GET','POST'])
 @login_required
