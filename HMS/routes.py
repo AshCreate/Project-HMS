@@ -3,7 +3,7 @@ import secrets
 from flask import render_template, url_for, flash, redirect, request, abort
 from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
-from HMS.models import User, Hostel, Payment, Room,Beds
+from HMS.models import User, Hostel, Payment, Room,Beds,Images
 from HMS.static.tourcontent import tourContent
 from HMS.static.reportContent import reportContent
 from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm, EditRoomPricingForm, AdminAddPaymentForm
@@ -279,9 +279,14 @@ def editroompricing():
   return render_template('edit_roompricing.html', form2 = form2, form = form, legend = "Edit Room Pricing")
 
 
-@app.route('/admin/payments')
+@app.route('/admin/payments', methods=['GET', 'POST'])
 @login_required
 def payments():
+    #page = request.args.get('page', 1, type=int)
     form2 = AnnouncementForm()
     form = AdminAddPaymentForm()
-    return render_template('payments.html', form2 = form2, form = form)
+    payment = Images.query.filter_by(processed="False").order_by(Images.date_posted.desc())#.paginate(page=page, per_page=6)
+
+    return render_template('payments.html', form2 = form2, form = form,payment=payment)
+
+

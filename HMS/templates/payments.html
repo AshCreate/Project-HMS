@@ -1,9 +1,10 @@
 {% extends 'admin_layout.html' %}
 {% block content %}
+    {% for item in payment.items%}
         <div class="row">
             <div class="container">
                 <div>
-                   <a>Yaw Botwe</a><a style="position: relative; left: 80%">2018-05-04</a>
+                   <a> {{ payment.user.firstname }} {{ payment.user.lastname }}</a><a style="position: relative; left: 80%">{{post.date_posted.strftime('%Y-%m-%d')}}</a>
                 </div>
                 <div class="card w-85" style="background-color: #E6E6E6">
                     <img class="card-img-top" src="/static/img/back3.jpg" style="height: 300px" alt="Card image cap">
@@ -28,6 +29,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
+    {%endfor%}
 {% endblock %}
