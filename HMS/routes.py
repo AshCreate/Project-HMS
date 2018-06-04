@@ -188,7 +188,7 @@ def detailed_report(id):
     return render_template('detailed_reports.html', table=table, form2=form2)
   if(id == 'totStuPaid'):
       table = TotalFullPaidStudentsReport(db.engine.execute("SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining"+
-            " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining=0"))
+            " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining <= 0"))
       return render_template('detailed_reports.html', table=table, form2=form2)
   if (id == 'totNotFullPaid'):
       table = TotalFullPaidStudentsReport(db.engine.execute(
@@ -301,14 +301,21 @@ def input_payment(id):
   if form.validate_on_submit():
       if Payment.query.filter_by(user_id = student_id).order_by(Payment.payment_id.desc()).first():
           prev_amountremaining = Payment.query.filter_by(user_id = student_id).order_by(Payment.payment_id.desc()).first()
-          input = Payment(user_id= student_id, amount_paid = form.price.data, amount_remaining= prev_amountremaining.amount_remaining - form.price.data)
+          input = Payment(user_id= student_id, amount_paid = prev_amountremaining.amount_paid + form.price.data, amount_remaining= prev_amountremaining.amount_remaining - form.price.data)
           db.session.add(input)
+          db.session.delete(prev_amountremaining)
+          image.processed = "True"
           db.session.commit()
+          flash('Payment has been added', 'success')
+          return redirect(url_for('input_payment', id = id))
       else:
           input = Payment(user_id=student_id, amount_paid=form.price.data,
                           amount_remaining=room_price - form.price.data)
           db.session.add(input)
+          image.processed = "True"
           db.session.commit()
+          flash('Payment has been added', 'success')
+          return redirect(url_for('input_payment', id=id))
 
   return render_template('input_payments.html', form2=form2, form=form,
           legend = "Input Payment for " + student.firstname + " " + student.lastname )
