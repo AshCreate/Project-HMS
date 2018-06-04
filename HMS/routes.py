@@ -6,7 +6,8 @@ from flask_login import login_user, current_user, logout_user, login_required
 from HMS.models import User, Hostel, Payment, Room,Beds,Images
 from HMS.static.tourcontent import tourContent
 from HMS.static.reportContent import reportContent
-from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, UpdateAccountForm, EditRoomPricingForm, AdminAddPaymentForm
+from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, \
+  UpdateAccountForm, EditRoomPricingForm, AdminAddPaymentForm, ChangePasswordForm, EditHostelDetailsForm
 from HMS.tables import TotalRoomReport, TotalStudentsReport, TotalFullPaidStudentsReport
 
 
@@ -285,8 +286,43 @@ def payments():
     #page = request.args.get('page', 1, type=int)
     form2 = AnnouncementForm()
     form = AdminAddPaymentForm()
-    payment = Images.query.filter_by(processed="False").order_by(Images.date_posted.desc())#.paginate(page=page, per_page=6)
+    payment = Images.query.filter_by(processed="False").order_by(Images.date_posted.desc()).all()#.paginate(page=page, per_page=6)
 
-    return render_template('payments.html', form2 = form2, form = form,payment=payment)
+    return render_template('payments.html', form2 = form2, form = form, payment=payment)
 
+@app.route('/admin/changepassword', methods=['GET','POST'])
+@login_required
+def change_Adminpassword():
+  form2 = AnnouncementForm()
+  form = ChangePasswordForm()
+  user = User.query.filter_by(id=current_user.id).first()
+  if form.validate_on_submit():
+    if bcrypt.check_password_hash(user.password, form.current_password.data):
+      hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+      user.password = hashed_password
+      db.session.commit()
+      flash('Your password has been changed!', 'success')
+      return redirect(url_for('change_Adminpassword'))
+    else:
+      flash('Current password might be wrong', 'danger')
+      return redirect(url_for('change_Adminpassword'))
+  return render_template('change_Adminpassword.html', form2=form2, form=form, legend = "Change Password")
+
+
+@app.route('/admin/edithosteldetails', methods=['GET', 'POST'])
+@login_required
+def edit_hostelDetails():
+  form2 = AnnouncementForm()
+  form = EditHostelDetailsForm()
+  if form.validate_on_submit():
+    for item in tourContent:
+      if current_user.hostel_id == item['id']:
+        item['body'] = form.description.data
+        flash('Hostel description has been updated', 'success')
+        return redirect(url_for('edit_hostelDetails'))
+  elif request.method == 'GET':
+    for item in tourContent:
+      if current_user.hostel_id == item['id']:
+        form.description.data = item['body']
+  return render_template('edit_hostelDetails.html', form2=form2, form=form, legend = 'Edit Hostel Details')
 

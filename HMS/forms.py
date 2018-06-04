@@ -94,3 +94,13 @@ class EditRoomPricingForm(FlaskForm):
 class AdminAddPaymentForm(FlaskForm):
     price = IntegerField('Price', validators=[DataRequired(), NumberRange(min=0, max=None, message="Price must be greater than 0")])
     submit = SubmitField('Add Payment')
+
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    confirm_newpassword = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
+    submit = SubmitField('Change Password')
+
+class EditHostelDetailsForm(FlaskForm):
+    description = TextAreaField('Hostel Description', validators=[DataRequired()])
+    submit = SubmitField('Update Hostel Details')
