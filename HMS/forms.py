@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, IntegerField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange
 from HMS.models import User
 from flask_login import current_user
 from flask_table import Table, Col
@@ -88,9 +88,9 @@ class EditRoomPricingForm(FlaskForm):
                                                                (2, 'Two in a room'),
                                                                (3, 'Three in a room'),
                                                                (4, 'Four in a room')], coerce=int)
-    price = IntegerField('Price', validators=[DataRequired()])
+    price = IntegerField('Price', validators=[DataRequired(), NumberRange(min=0, max=None, message="Price must be greater than 0")])
     submit = SubmitField('Change Room Pricing')
 
 class AdminAddPaymentForm(FlaskForm):
-    price = IntegerField('Price', validators=[DataRequired()])
+    price = IntegerField('Price', validators=[DataRequired(), NumberRange(min=0, max=None, message="Price must be greater than 0")])
     submit = SubmitField('Add Payment')
