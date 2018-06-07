@@ -10,7 +10,7 @@
                     <p class="card-text">This is a room with {{ room[1] }} beds going for the price of {{ room[2] }}</p>
                   </div>
                   <div class="card-action">
-                    <a class="btn btn-info" style="float: right; margin: 10px" href="#">Book room</a>
+                    <a class="btn btn-info" style="float: right; margin: 10px" href="{{ url_for('picked_room', id = room[0])}}">Book room</a>
                   </div>
                 </div>
             {% endfor %}

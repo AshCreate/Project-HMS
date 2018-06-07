@@ -37,9 +37,14 @@
                               <a class="nav-link js-scroll-trigger text-white" href="#">Book Room</a>
                             </li>
                         {% endif %}
-                        <li class="nav-item">
-                          <a class="nav-link js-scroll-trigger text-dark" href="#">Send Payment Receipt</a>
-                        </li>
+                        {% if user.hostel_id != None and user.room_id != None %}
+                            <li class="nav-item">
+                              <a class="nav-link js-scroll-trigger text-dark" href="#">View Room</a>
+                            </li>
+                            <li class="nav-item">
+                              <a class="nav-link js-scroll-trigger text-dark" href="#">Send Payment Receipt</a>
+                            </li>
+                        {% endif %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-dark" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Account</a>
                             <div class="dropdown-menu">

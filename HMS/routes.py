@@ -387,3 +387,37 @@ def student():
     announcements = Announcement.query.filter_by(user_id = ann_userId.id)
     return render_template('hostel_announcements.html', announcements=announcements, user = user)
 
+
+@app.route("/student/<id>/picked_hostel")
+@login_required
+def picked_hostel(id):
+  user = User.query.filter_by(id=current_user.id).first()
+  hostelInfo = None
+  for hostel in tourContent:
+    if (hostel['id'] == int(id)):
+      hostelInfo = hostel
+  return render_template('selected_hostel.html', hostelInfo=hostelInfo, user = user)
+
+@app.route("/student/<id>/picked_hostel/selected", methods=['GET', 'POST'])
+@login_required
+def confirm_hostel(id):
+  user = User.query.filter_by(id=current_user.id).first()
+  user.hostel_id = int(id)
+  db.session.commit()
+  return redirect(url_for('student'))
+
+@app.route("/student/<id>/picked_room")
+@login_required
+def picked_room(id):
+  user = User.query.filter_by(id=current_user.id).first()
+  room = Room.query.filter_by(room_num = id).first()
+  table = TotalStudentsReport(room.occupants)
+  return render_template('selected_room.html', table= table, room = room, user = user)
+
+@app.route("/student/<id>/picked_room/selected", methods=['GET', 'POST'])
+@login_required
+def confirm_room(id):
+  user = User.query.filter_by(id=current_user.id).first()
+  user.room_id = id
+  db.session.commit()
+  return redirect(url_for('student'))
