@@ -1,5 +1,6 @@
 import os
 import secrets
+from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
@@ -7,7 +8,8 @@ from HMS.models import User, Hostel, Payment, Room,Beds,Images, Announcement
 from HMS.static.tourcontent import tourContent
 from HMS.static.reportContent import reportContent
 from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, \
-  UpdateAccountForm, EditRoomPricingForm, AdminAddPaymentForm, ChangePasswordForm, EditHostelDetailsForm
+  UpdateAccountForm, EditRoomPricingForm, AdminAddPaymentForm, ChangePasswordForm, EditHostelDetailsForm,\
+  StudentPaymentForm
 from HMS.tables import TotalRoomReport, TotalStudentsReport, TotalFullPaidStudentsReport
 
 
@@ -430,3 +432,35 @@ def student_announcement():
   announcement = Announcement.query.order_by(Announcement.date_posted.desc())
 
   return render_template('student_announcement_page.html',user=user,announcement = announcement)
+
+
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/payments', picture_fn)
+
+    output_size = (125, 125)
+    i = Image.open(form_picture)
+    i.save(picture_path)
+
+    return picture_fn
+
+@app.route("/student/make_payment", methods=['GET', 'POST'])
+@login_required
+def student_payment():
+  form=StudentPaymentForm()
+  user = User.query.filter_by(id=current_user.id).first()
+  amount_remaining=1000
+  if form.validate_on_submit():
+    if form.receipt.data:
+      picture_file = save_picture(form.receipt.data)
+      image=Images(image_file=picture_file,user_id=current_user.id)
+      image_name=image.image_file
+      db.session.add(image)
+      db.session.commit()
+      flash('Receipt successfully sent, wait for confirmation from your Hostel Admin', 'success')
+      return redirect(url_for('student_payment'))
+    elif request.method == 'GET':
+      form.receipt.data = None
+  return render_template('student_payment.html',user=user,form=form,amount_remaining=amount_remaining)

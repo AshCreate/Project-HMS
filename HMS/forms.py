@@ -83,6 +83,7 @@ class UpdateAccountForm(FlaskForm):
             if user:
                 raise ValidationError('That email is taken. Please choose a different one.')
 
+
 class EditRoomPricingForm(FlaskForm):
     beds = SelectField('Number of occupants allowed', choices=[(1, 'One in a room'),
                                                                (2, 'Two in a room'),
@@ -91,9 +92,11 @@ class EditRoomPricingForm(FlaskForm):
     price = IntegerField('Price', validators=[DataRequired(), NumberRange(min=0, max=None, message="Price must be greater than 0")])
     submit = SubmitField('Change Room Pricing')
 
+
 class AdminAddPaymentForm(FlaskForm):
     price = IntegerField('Price', validators=[DataRequired(), NumberRange(min=0, max=None, message="Price must be greater than 0")])
     submit = SubmitField('Add Payment')
+
 
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField('Current Password', validators=[DataRequired()])
@@ -101,6 +104,12 @@ class ChangePasswordForm(FlaskForm):
     confirm_newpassword = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
     submit = SubmitField('Change Password')
 
+
 class EditHostelDetailsForm(FlaskForm):
     description = TextAreaField('Hostel Description', validators=[DataRequired()])
     submit = SubmitField('Update Hostel Details')
+
+
+class StudentPaymentForm(FlaskForm):
+    receipt = FileField('Select document containing evidence of payment', validators=[FileAllowed(['jpg', 'png', 'pdf', 'jpeg'])])
+    submit = SubmitField('Make Payment')
