@@ -377,7 +377,7 @@ def edit_hostelDetails():
 def student():
   user = User.query.filter_by(id = current_user.id).first()
   if user.hostel_id == None and user.room_id == None:
-    return render_template('pick_a_hostel.html', hostels=tourContent, user = user)
+    return render_template('firsttimehostelview.html', hostels=tourContent, user = user)
   elif user.hostel_id != None and user.room_id == None:
     hostel = Hostel.query.filter_by(hostel_id = user.hostel_id).first()
     rooms = db.engine.execute("Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id == rooms.room_num) and hostel_id == " + str(hostel.hostel_id)).fetchall()
@@ -421,3 +421,12 @@ def confirm_room(id):
   user.room_id = id
   db.session.commit()
   return redirect(url_for('student'))
+
+
+@app.route("/student/announcement")
+@login_required
+def student_announcement():
+  user = User.query.filter_by(id=current_user.id).first()
+  announcement = Announcement.query.order_by(Announcement.date_posted.desc())
+
+  return render_template('student_announcement_page.html',user=user,announcement = announcement)
