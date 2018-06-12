@@ -1,6 +1,6 @@
 import os
 import secrets
-from PIL import Image
+from PIL import *
 from flask import render_template, url_for, flash, redirect, request, abort
 from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
@@ -387,7 +387,7 @@ def student():
   elif user.hostel_id != None and user.room_id != None:
     ann_userId = User.query.filter_by(role = "admin", hostel_id = user.hostel_id).first()
     announcements = Announcement.query.filter_by(user_id = ann_userId.id)
-    return render_template('hostel_announcements.html', announcements=announcements, user = user)
+    return render_template('student_announcement_page.html',user=user,announcement = announcements)
 
 
 @app.route("/student/<id>/picked_hostel")
@@ -425,15 +425,6 @@ def confirm_room(id):
   return redirect(url_for('student'))
 
 
-@app.route("/student/announcement")
-@login_required
-def student_announcement():
-  user = User.query.filter_by(id=current_user.id).first()
-  announcement = Announcement.query.order_by(Announcement.date_posted.desc())
-
-  return render_template('student_announcement_page.html',user=user,announcement = announcement)
-
-
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
@@ -464,3 +455,20 @@ def student_payment():
     elif request.method == 'GET':
       form.receipt.data = None
   return render_template('student_payment.html',user=user,form=form,amount_remaining=amount_remaining)
+
+
+@app.route("/student/view_room", methods=['GET', 'POST'])
+@login_required
+def student_viewroom():
+  user = User.query.filter_by(id=current_user.id).first()
+  room = Room.query.filter_by(room_num=current_user.room_id).first()
+  table = TotalStudentsReport(room.occupants)
+  return render_template('student_viewroom.html', table=table, room=room, user=user)
+
+@app.route("/student/view_room/leave_room", methods=['GET', 'POST'])
+@login_required
+def student_leaveroom():
+  user = User.query.filter_by(id=current_user.id).first()
+  user.room_id = None
+  db.session.commit()
+  return redirect(url_for('student'))

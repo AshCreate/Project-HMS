@@ -2,7 +2,7 @@
 {% block content %}
     <div class="row">
         <div class="col-lg-12">
-            <img style="height: 600px" class="img-fluid rounded" src="{{'/'+ hostelInfo['pic']}}">
+            <img style="width: 100%;column-count: 1; object-fit: cover;" class="img-fluid rounded" src="{{'/'+ hostelInfo['pic']}}">
         </div>
         <div class="col-lg-12" style="margin-top: 40px">
             <h4>Hostel Description</h4>
@@ -12,6 +12,7 @@
             <button type="button" class = "btn btn-lg btn-info m-1" data-toggle="modal" data-target="#confirmModal">
                 Select {{ hostelInfo['title'] }} as your hostel
             </button>
+
         </div>
     </div>
 
