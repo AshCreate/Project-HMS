@@ -32,17 +32,12 @@
                         <li class="nav-item">
                           <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('student') }}">Home</a>
                         </li>
-                        {% if user.hostel_id != None and user.room_id == None %}
-                            <li class="nav-item">
-                              <a class="nav-link js-scroll-trigger text-white" href="#">Book Room</a>
-                            </li>
-                        {% endif %}
                         {% if user.hostel_id != None and user.room_id != None %}
                             <li class="nav-item">
                               <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('student_viewroom') }}">View Room</a>
                             </li>
                             <li class="nav-item">
-                              <a class="nav-link js-scroll-trigger text-white" href="#">Send Payment Receipt</a>
+                              <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('student_payment') }}">Send Payment Receipt</a>
                             </li>
                         {% endif %}
                         <li class="nav-item dropdown">
