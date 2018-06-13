@@ -1,7 +1,8 @@
 {% extends 'student_layout.html' %}
 {% block content %}
     <div class="container">
-        <strong><legend>{{ room.room_num }}</legend></strong><br>
+        <strong><legend>{{ room.room_num }}</legend></strong>
+        <p>This is a {{ room.beds }}-in-a-room</p><br>
 
         <h4>Current Occupants</h4>
         {{ table}}
