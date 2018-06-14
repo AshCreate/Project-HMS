@@ -472,3 +472,23 @@ def student_leaveroom():
   user.room_id = None
   db.session.commit()
   return redirect(url_for('student'))
+
+@app.route("/student/account", methods=['GET', 'POST'])
+@login_required
+def updatestudentaccount():
+    form = UpdateAccountForm()
+    user = User.query.filter_by(id=current_user.id).first()
+    if form.validate_on_submit():
+        current_user.firstname = form.firstname.data
+        current_user.lastname = form.lastname.data
+        current_user.number = form.number.data
+        current_user.email = form.email.data
+        db.session.commit()
+        flash('Your account has been updated!', 'success')
+        return redirect(url_for('updatestudentaccount'))
+    elif request.method == 'GET':
+        form.firstname.data = current_user.firstname
+        form.lastname.data = current_user.lastname
+        form.number.data = current_user.number
+        form.email.data = current_user.email
+    return render_template('update_studentAccount.html', title='Account', form=form, user = user)
