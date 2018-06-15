@@ -205,16 +205,20 @@ def detailed_report(id):
     return render_template('detailed_reports.html', table=table, form2=form2)
   if(id == 'totStuPaid'):
       table = TotalFullPaidStudentsReport(db.engine.execute("SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining"+
-            " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining <= 0"))
+            " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining <= 0 and Users.hostel_id == " +  str(hostel.hostel_id)))
       return render_template('detailed_reports.html', table=table, form2=form2)
   if (id == 'totNotFullPaid'):
       table = TotalFullPaidStudentsReport(db.engine.execute(
           "SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining" +
-          " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining>0"))
+          " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining>0 and Users.hostel_id == " +  str(hostel.hostel_id)))
       return render_template('detailed_reports.html', table=table, form2=form2)
   if(id == 'totFullRooms'):
     table = TotalRoomReport(db.engine.execute("Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " +  str(hostel.hostel_id)))
     return  render_template('detailed_reports.html', table=table, form2=form2)
+  if (id == 'totNotFullRooms'):
+      table = TotalRoomReport(db.engine.execute(
+          "Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " + str(hostel.hostel_id)))
+      return render_template('detailed_reports.html', table=table, form2=form2)
   if(id == 'totMaleStu'):
     table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'M' and room_id not null and hostel_id == " +  str(hostel.hostel_id)))
     return render_template('detailed_reports.html', table=table, form2=form2)
@@ -355,7 +359,7 @@ def change_Adminpassword():
           return redirect(url_for('change_Adminpassword'))
         else:
           flash('Current password might be wrong', 'danger')
-          #return redirect(url_for('change_Adminpassword'))
+          return redirect(url_for('change_Adminpassword'))
   return render_template('change_Adminpassword.html', form2=form2, form=form, legend = "Change Password")
 
 
