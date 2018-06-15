@@ -80,44 +80,47 @@ def tour():
 @app.route("/admin", methods=['GET', 'POST'])
 @login_required
 def admin():
-  form2 = AnnouncementForm()
-  hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
-  hostelName = hostel.hostel_name
-  totalNumOfRooms = len(hostel.rooms)
-  totalNumofStudents = 0
-  totalNumOfMales = 0
-  totalNumOfFemales = 0
-  totalNumofFullyPaid = 0
+  if current_user.role == 'admin':
+      form2 = AnnouncementForm()
+      hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
+      hostelName = hostel.hostel_name
+      totalNumOfRooms = len(hostel.rooms)
+      totalNumofStudents = 0
+      totalNumOfMales = 0
+      totalNumOfFemales = 0
+      totalNumofFullyPaid = 0
 
-  if request.method == 'POST':
-    if form2.validate_on_submit():
-        new_announce = Announcement(subject= form2.subject.data, message= form2.message.data, user_id= current_user.id)
-        db.session.add(new_announce)
-        db.session.commit()
-        flash('Announcement has been made', 'success')
-        return redirect(url_for('admin'))
+      if request.method == 'POST':
+        if form2.validate_on_submit():
+            new_announce = Announcement(subject= form2.subject.data, message= form2.message.data, user_id= current_user.id)
+            db.session.add(new_announce)
+            db.session.commit()
+            flash('Announcement has been made', 'success')
+            return redirect(url_for('admin'))
 
-  for student in hostel.occupants:
-    if student.room_id != None:
-      totalNumofStudents += 1
-    if student.gender == 'M' and student.room_id != None:
-      totalNumOfMales += 1
-    elif student.gender == 'F' and student.room_id != None:
-      totalNumOfFemales += 1
+      for student in hostel.occupants:
+        if student.room_id != None:
+          totalNumofStudents += 1
+        if student.gender == 'M' and student.room_id != None:
+          totalNumOfMales += 1
+        elif student.gender == 'F' and student.room_id != None:
+          totalNumOfFemales += 1
 
-  fullyOccupiedRooms = 0
-  occupied_rooms = db.engine.execute("Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " + str(hostel.hostel_id))
-  for room in occupied_rooms:
-      fullyOccupiedRooms += 1
+      fullyOccupiedRooms = 0
+      occupied_rooms = db.engine.execute("Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " + str(hostel.hostel_id))
+      for room in occupied_rooms:
+          fullyOccupiedRooms += 1
 
-  for payment in Payment.query.all():
-    if payment.amount_remaining == 0:
-      totalNumofFullyPaid += 1
+      for payment in Payment.query.all():
+        if payment.amount_remaining == 0:
+          totalNumofFullyPaid += 1
 
 
-  return render_template('admin_home.html', form2=form2, hostelName=hostelName, totalNumOfRooms=totalNumOfRooms,
-                         totalNumofStudents=totalNumofStudents, fullyOccupiedRooms=fullyOccupiedRooms, totalNumOfFemales=totalNumOfFemales,
-                         totalNumOfMales=totalNumOfMales, totalNumofFullyPaid=totalNumofFullyPaid)
+      return render_template('admin_home.html', form2=form2, hostelName=hostelName, totalNumOfRooms=totalNumOfRooms,
+                             totalNumofStudents=totalNumofStudents, fullyOccupiedRooms=fullyOccupiedRooms, totalNumOfFemales=totalNumOfFemales,
+                             totalNumOfMales=totalNumOfMales, totalNumofFullyPaid=totalNumofFullyPaid)
+  else:
+      return render_template('logInError.html')
 
 
 @app.route("/admin/addroom", methods=['GET', 'POST'])
@@ -300,7 +303,7 @@ def payments():
     #page = request.args.get('page', 1, type=int)
     form2 = AnnouncementForm()
     payment = Images.query.filter_by(processed="False").order_by(Images.date_posted.desc()).all()#.paginate(page=page, per_page=6)
-    return render_template('payments.html', form2 = form2, payment=payment)
+    return render_template('payments.html', form2 = form2, payment=payment, User = User)
 
 @app.route('/admin/payments/<id>/input_payment', methods=['GET', 'POST'])
 @login_required
