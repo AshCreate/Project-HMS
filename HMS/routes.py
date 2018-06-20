@@ -348,7 +348,6 @@ def change_Adminpassword():
   form2 = AnnouncementForm()
   form = ChangePasswordForm()
   user = User.query.filter_by(id=current_user.id).first()
-  print(user.firstname)
   if request.method == 'POST':
     if form.validate_on_submit():
         if bcrypt.check_password_hash(user.password, form.current_password.data):
@@ -384,17 +383,21 @@ def edit_hostelDetails():
 @app.route("/student")
 @login_required
 def student():
-  user = User.query.filter_by(id = current_user.id).first()
-  if user.hostel_id == None and user.room_id == None:
-    return render_template('firsttimehostelview.html', hostels=tourContent, user = user)
-  elif user.hostel_id != None and user.room_id == None:
-    hostel = Hostel.query.filter_by(hostel_id = user.hostel_id).first()
-    rooms = db.engine.execute("Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id == rooms.room_num) and hostel_id == " + str(hostel.hostel_id)).fetchall()
-    return render_template('book_a_room.html', rooms=rooms, user = user)
-  elif user.hostel_id != None and user.room_id != None:
-    ann_userId = User.query.filter_by(role = "admin", hostel_id = user.hostel_id).first()
-    announcements = Announcement.query.filter_by(user_id = ann_userId.id)
-    return render_template('student_announcement_page.html',user=user,announcement = announcements)
+    if current_user.role == 'student':
+      user = User.query.filter_by(id = current_user.id).first()
+      if user.hostel_id == None and user.room_id == None:
+        return render_template('firsttimehostelview.html', hostels=tourContent, user = user)
+      elif user.hostel_id != None and user.room_id == None:
+        hostel = Hostel.query.filter_by(hostel_id = user.hostel_id).first()
+        rooms = db.engine.execute("Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id == rooms.room_num) and hostel_id == " + str(hostel.hostel_id)).fetchall()
+        return render_template('book_a_room.html', rooms=rooms, user = user)
+      elif user.hostel_id != None and user.room_id != None:
+        ann_userId = User.query.filter_by(role = "admin", hostel_id = user.hostel_id).first()
+        announcements = Announcement.query.filter_by(user_id = ann_userId.id)
+        return render_template('student_announcement_page.html',user=user,announcement = announcements)
+
+    else:
+        return render_template('logInStudentError.html')
 
 
 @app.route("/student/<id>/picked_hostel")
