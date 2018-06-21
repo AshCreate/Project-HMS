@@ -62,6 +62,17 @@
     <main role = "main" class="container">
         <div class="row">
             <div class="col-md-12" style="margin-top: 100px">
+                <div style="margin: 0;">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="flash alert alert-{{ category }}">
+                                  {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
                 {% block content %}
                 {% endblock %}
             </div>
