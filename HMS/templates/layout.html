@@ -27,24 +27,17 @@
           <div class="collapse navbar-collapse" id="navbarToggle">
             <!-- Navbar Right Side -->
             <div class="navbar-nav ml-auto">
-              {% if current_user.is_authenticated %}
-                <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
-                <a class="nav-item nav-link" href="{{ url_for('account') }}">Account</a>
-                <a class="nav-item nav-link" href="{{ url_for('home') }}">Housing</a>
-                <a class="nav-item nav-link" href="{{ url_for('home') }}">Logout</a>
-              {% else %}
                 {% if title == "Login" %}
-                  <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
-                  <a class="nav-item nav-link" href="{{ url_for('about') }}">About</a>
-                  <a class="nav-item nav-link" href="{{ url_for('tour') }}">Take a Tour</a>
-                  <a class="nav-item nav-link" href="{{ url_for('signup') }}">Sign Up</a>
+                  <a class="nav-item nav-link js-scroll-trigger text-white" href="{{ url_for('home') }}">Home</a>
+                  <a class="nav-item nav-link js-scroll-trigger text-white" href="{{ url_for('about') }}">About</a>
+                  <a class="nav-item nav-link js-scroll-trigger text-white" href="{{ url_for('tour') }}">Take a Tour</a>
+                  <a class="nav-item nav-link js-scroll-trigger text-white" href="{{ url_for('signup') }}">Sign Up</a>
                 {% else %}
-                  <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
-                  <a class="nav-item nav-link" href="{{ url_for('about') }}">About</a>
-                  <a class="nav-item nav-link" href="{{ url_for('tour') }}">Take a Tour</a>
-                  <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
+                  <a class="nav-item nav-link js-scroll-trigger text-white" href="{{ url_for('home') }}">Home</a>
+                  <a class="nav-item nav-link js-scroll-trigger text-white" href="{{ url_for('about') }}">About</a>
+                  <a class="nav-item nav-link js-scroll-trigger text-white" href="{{ url_for('tour') }}">Take a Tour</a>
+                  <a class="nav-item nav-link js-scroll-trigger text-white" href="{{ url_for('login') }}">Login</a>
                 {% endif %}
-              {% endif %}
             </div>
           </div>
         </div>

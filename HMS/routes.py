@@ -80,349 +80,414 @@ def tour():
 @app.route("/admin", methods=['GET', 'POST'])
 @login_required
 def admin():
-  form2 = AnnouncementForm()
-  hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
-  hostelName = hostel.hostel_name
-  totalNumOfRooms = len(hostel.rooms)
-  totalNumofStudents = 0
-  totalNumOfMales = 0
-  totalNumOfFemales = 0
-  totalNumofFullyPaid = 0
+  if current_user.role == 'admin':
+      form2 = AnnouncementForm()
+      hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
+      hostelName = hostel.hostel_name
+      totalNumOfRooms = len(hostel.rooms)
+      totalNumofStudents = 0
+      totalNumOfMales = 0
+      totalNumOfFemales = 0
+      totalNumofFullyPaid = 0
 
-  if request.method == 'POST':
-    if form2.validate_on_submit():
-        new_announce = Announcement(subject= form2.subject.data, message= form2.message.data, user_id= current_user.id)
-        db.session.add(new_announce)
-        db.session.commit()
-        flash('Announcement has been made', 'success')
-        return redirect(url_for('admin'))
+      if request.method == 'POST':
+        if form2.validate_on_submit():
+            new_announce = Announcement(subject= form2.subject.data, message= form2.message.data, user_id= current_user.id)
+            db.session.add(new_announce)
+            db.session.commit()
+            flash('Announcement has been made', 'success')
+            return redirect(url_for('admin'))
 
-  for student in hostel.occupants:
-    if student.room_id != None:
-      totalNumofStudents += 1
-    if student.gender == 'M' and student.room_id != None:
-      totalNumOfMales += 1
-    elif student.gender == 'F' and student.room_id != None:
-      totalNumOfFemales += 1
+      for student in hostel.occupants:
+        if student.room_id != None:
+          totalNumofStudents += 1
+        if student.gender == 'M' and student.room_id != None:
+          totalNumOfMales += 1
+        elif student.gender == 'F' and student.room_id != None:
+          totalNumOfFemales += 1
 
-  fullyOccupiedRooms = 0
-  occupied_rooms = db.engine.execute("Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " + str(hostel.hostel_id))
-  for room in occupied_rooms:
-      fullyOccupiedRooms += 1
+      fullyOccupiedRooms = 0
+      occupied_rooms = db.engine.execute("Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " + str(hostel.hostel_id))
+      for room in occupied_rooms:
+          fullyOccupiedRooms += 1
 
-  for payment in Payment.query.all():
-    if payment.amount_remaining == 0:
-      totalNumofFullyPaid += 1
+      for payment in Payment.query.all():
+        if payment.amount_remaining == 0:
+          totalNumofFullyPaid += 1
 
 
-  return render_template('admin_home.html', form2=form2, hostelName=hostelName, totalNumOfRooms=totalNumOfRooms,
-                         totalNumofStudents=totalNumofStudents, fullyOccupiedRooms=fullyOccupiedRooms, totalNumOfFemales=totalNumOfFemales,
-                         totalNumOfMales=totalNumOfMales, totalNumofFullyPaid=totalNumofFullyPaid)
+      return render_template('admin_home.html', form2=form2, hostelName=hostelName, totalNumOfRooms=totalNumOfRooms,
+                             totalNumofStudents=totalNumofStudents, fullyOccupiedRooms=fullyOccupiedRooms, totalNumOfFemales=totalNumOfFemales,
+                             totalNumOfMales=totalNumOfMales, totalNumofFullyPaid=totalNumofFullyPaid)
+  else:
+      return render_template('logInError.html')
 
 
 @app.route("/admin/addroom", methods=['GET', 'POST'])
 @login_required
 def addroom():
-  form = AddRoomForm()
-  form2 = AnnouncementForm()
-  if form.validate_on_submit():
-    room_num = form.room_num.data
-    beds = form.beds.data
-    hostel_id=current_user.hostel_id
-    hostel_name=Hostel.query.filter_by(hostel_id=hostel_id).first()
-    hostel_name=hostel_name.hostel_name.lower()
-    bed=f'{hostel_name}{beds}'
-    price = Beds.query.filter_by(beds_id=bed).first()
-    price=price.price
-    room = Room(room_num=room_num, beds=beds, price=price, hostel_id=current_user.hostel_id)
-    db.session.add(room)
-    db.session.commit()
-    flash('Room successfully added', 'success')
-    return redirect(url_for('addroom'))
+    if current_user.role == 'admin':
+      form = AddRoomForm()
+      form2 = AnnouncementForm()
+      if form.validate_on_submit():
+        room_num = form.room_num.data
+        beds = form.beds.data
+        hostel_id=current_user.hostel_id
+        hostel_name=Hostel.query.filter_by(hostel_id=hostel_id).first()
+        hostel_name=hostel_name.hostel_name.lower()
+        bed=f'{hostel_name}{beds}'
+        price = Beds.query.filter_by(beds_id=bed).first()
+        price=price.price
+        room = Room(room_num=room_num, beds=beds, price=price, hostel_id=current_user.hostel_id)
+        db.session.add(room)
+        db.session.commit()
+        flash('Room successfully added', 'success')
+        return redirect(url_for('addroom'))
 
-  return render_template('addroom.html', title='Add Room',
-                         form=form, form2=form2, legend='Add New Room')
+      return render_template('addroom.html', title='Add Room',
+                             form=form, form2=form2, legend='Add New Room')
+    else:
+        return render_template('logInError.html')
 
 
 @app.route("/admin/occupants_details", methods=['GET', 'POST'])
 @login_required
 def occupants_details():
-  form = AnnouncementForm()
-  hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
-  table = TotalStudentsReport(db.engine.execute("select * from Users where room_id not null and hostel_id == " +  str(hostel.hostel_id)))
-  return render_template('occupants_details.html', title='Occupants Details',
-                         form2=form, table=table)
+    if current_user.role == 'admin':
+      form = AnnouncementForm()
+      hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
+      table = TotalStudentsReport(db.engine.execute("select * from Users where room_id not null and hostel_id == " +  str(hostel.hostel_id)))
+      return render_template('occupants_details.html', title='Occupants Details',
+                             form2=form, table=table)
+    else:
+        return render_template('logInError.html')
 
 
 @app.route("/admin/viewrooms", methods=['GET'])
 @login_required
 def viewrooms():
-  form2 = AnnouncementForm()
-  rooms = Room.query.filter_by(hostel_id=current_user.hostel_id).all()
-  return render_template('view_rooms.html', form2=form2, rooms=rooms)
+    if current_user.role == 'admin':
+      form2 = AnnouncementForm()
+      rooms = Room.query.filter_by(hostel_id=current_user.hostel_id).all()
+      return render_template('view_rooms.html', form2=form2, rooms=rooms)
+    else:
+        return render_template('logInError.html')
 
 
 @app.route("/admin/account", methods=['GET', 'POST'])
 @login_required
 def updateaccount():
-  form = UpdateAccountForm()
-  form2 = AnnouncementForm()
-  if form.validate_on_submit():
-    current_user.firstname = form.firstname.data
-    current_user.lastname = form.lastname.data
-    current_user.number = form.number.data
-    current_user.email = form.email.data
-    db.session.commit()
-    flash('Your account has been updated!', 'success')
-    return redirect(url_for('updateaccount'))
-  elif request.method == 'GET':
-    form.firstname.data = current_user.firstname
-    form.lastname.data = current_user.lastname
-    form.number.data = current_user.number
-    form.email.data = current_user.email
-  return render_template('updateaccount.html', title='Account', form=form, form2=form2)
+    if current_user.role == 'admin':
+      form = UpdateAccountForm()
+      form2 = AnnouncementForm()
+      if form.validate_on_submit():
+        current_user.firstname = form.firstname.data
+        current_user.lastname = form.lastname.data
+        current_user.number = form.number.data
+        current_user.email = form.email.data
+        db.session.commit()
+        flash('Your account has been updated!', 'success')
+        return redirect(url_for('updateaccount'))
+      elif request.method == 'GET':
+        form.firstname.data = current_user.firstname
+        form.lastname.data = current_user.lastname
+        form.number.data = current_user.number
+        form.email.data = current_user.email
+      return render_template('updateaccount.html', title='Account', form=form, form2=form2)
+
+    else:
+        return render_template('logInError.html')
 
 @app.route('/admin/reports',methods=['GET', 'POST'])
 @login_required
 def reports():
-  form2 = AnnouncementForm()
-  hostelName = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first().hostel_name
-  return render_template('reports.html', title = 'Reports', form2 = form2, hostelName = hostelName, reportContent = reportContent)
+    if current_user.role == 'admin':
+      form2 = AnnouncementForm()
+      hostelName = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first().hostel_name
+      return render_template('reports.html', title = 'Reports', form2 = form2, hostelName = hostelName, reportContent = reportContent)
+    else:
+        return render_template('logInError.html')
 
 @app.route('/admin/reports/detailed_report/<string:id>', methods=['GET', 'POST'])
 @login_required
 def detailed_report(id):
-  form2 = AnnouncementForm()
-  hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
-  if(id == "totRooms"):
-    table = TotalRoomReport(hostel.rooms)
-    return render_template('detailed_reports.html', table = table, form2 = form2)
-  if(id == 'totStu'):
-    table = TotalStudentsReport(db.engine.execute("select * from Users where room_id not null and users.hostel_id == " +  str(hostel.hostel_id)))
-    return render_template('detailed_reports.html', table=table, form2=form2)
-  if(id == 'totStuPaid'):
-      table = TotalFullPaidStudentsReport(db.engine.execute("SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining"+
-            " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining <= 0"))
-      return render_template('detailed_reports.html', table=table, form2=form2)
-  if (id == 'totNotFullPaid'):
-      table = TotalFullPaidStudentsReport(db.engine.execute(
-          "SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining" +
-          " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining>0"))
-      return render_template('detailed_reports.html', table=table, form2=form2)
-  if(id == 'totFullRooms'):
-    table = TotalRoomReport(db.engine.execute("Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " +  str(hostel.hostel_id)))
-    return  render_template('detailed_reports.html', table=table, form2=form2)
-  if(id == 'totMaleStu'):
-    table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'M' and room_id not null and hostel_id == " +  str(hostel.hostel_id)))
-    return render_template('detailed_reports.html', table=table, form2=form2)
-  if (id == 'totFemStu'):
-    table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'F' and room_id not null and hostel_id == " +  str(hostel.hostel_id)))
-    return render_template('detailed_reports.html', table=table, form2=form2)
+    if current_user.role == 'admin':
+      form2 = AnnouncementForm()
+      hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
+      if(id == "totRooms"):
+        table = TotalRoomReport(hostel.rooms)
+        return render_template('detailed_reports.html', table = table, form2 = form2)
+      if(id == 'totStu'):
+        table = TotalStudentsReport(db.engine.execute("select * from Users where room_id not null and users.hostel_id == " +  str(hostel.hostel_id)))
+        return render_template('detailed_reports.html', table=table, form2=form2)
+      if(id == 'totStuPaid'):
+          table = TotalFullPaidStudentsReport(db.engine.execute("SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining"+
+                " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining <= 0 and Users.hostel_id == " +  str(hostel.hostel_id)))
+          return render_template('detailed_reports.html', table=table, form2=form2)
+      if (id == 'totNotFullPaid'):
+          table = TotalFullPaidStudentsReport(db.engine.execute(
+              "SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining" +
+              " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining>0 and Users.hostel_id == " +  str(hostel.hostel_id)))
+          return render_template('detailed_reports.html', table=table, form2=form2)
+      if(id == 'totFullRooms'):
+        table = TotalRoomReport(db.engine.execute("Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " +  str(hostel.hostel_id)))
+        return  render_template('detailed_reports.html', table=table, form2=form2)
+      if (id == 'totNotFullRooms'):
+          table = TotalRoomReport(db.engine.execute(
+              "Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " + str(hostel.hostel_id)))
+          return render_template('detailed_reports.html', table=table, form2=form2)
+      if(id == 'totMaleStu'):
+        table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'M' and room_id not null and hostel_id == " +  str(hostel.hostel_id)))
+        return render_template('detailed_reports.html', table=table, form2=form2)
+      if (id == 'totFemStu'):
+        table = TotalStudentsReport(db.engine.execute("select * from Users where gender == 'F' and room_id not null and hostel_id == " +  str(hostel.hostel_id)))
+        return render_template('detailed_reports.html', table=table, form2=form2)
+    else:
+        return render_template('logInError.html')
 
 
 @app.route('/admin/viewrooms/room_details/<string:id>', methods=['GET', 'POST'])
 @login_required
 def default_roomview(id):
-  form2 = AnnouncementForm()
-  room = Room.query.filter_by(room_num=id).first()
-  table = TotalStudentsReport(room.occupants)
-  return render_template('default_roomview.html', room = room, form2 = form2, table = table)
+    if current_user.role == 'admin':
+      form2 = AnnouncementForm()
+      room = Room.query.filter_by(room_num=id).first()
+      table = TotalStudentsReport(room.occupants)
+      return render_template('default_roomview.html', room = room, form2 = form2, table = table)
+    else:
+        return render_template('logInError.html')
 
 
 @app.route('/admin/viewrooms/room_details/<string:id>/update', methods=['GET', 'POST'])
 @login_required
 def room_details(id):
   global table
-  form2 = AnnouncementForm()
-  form = EditRoomForm()
-  room = Room.query.filter_by(room_num = id).first()
-  hostel_id = current_user.hostel_id
-  hostel_name = Hostel.query.filter_by(hostel_id=hostel_id).first()
-  hostel_name = hostel_name.hostel_name.lower()
+  if current_user.role == 'admin':
+      form2 = AnnouncementForm()
+      form = EditRoomForm()
+      room = Room.query.filter_by(room_num = id).first()
+      hostel_id = current_user.hostel_id
+      hostel_name = Hostel.query.filter_by(hostel_id=hostel_id).first()
+      hostel_name = hostel_name.hostel_name.lower()
 
-  if form.validate_on_submit():
-    room.room_num = form.room_num.data
-    room.beds = form.beds.data
-    beds = room.beds
-    bed=f'{hostel_name}{beds}'
-    price = Beds.query.filter_by(beds_id=bed).first()
-    room.price=price.price
-    db.session.commit()
-    form.room_num.data = room.room_num
-    form.beds.data = int(room.beds)
-    flash('Room Sucessfully Updated!', 'success')
-    return redirect(url_for('room_details', id = room.room_num))
-  elif request.method == 'GET':
-    form.room_num.data = room.room_num
-    form.beds.data = int(room.beds)
-    table = TotalStudentsReport(room.occupants)
-  return render_template('room_details.html', legend='Edit Room',form=form,form2=form2,table=table, room = room)
+      if form.validate_on_submit():
+        room.room_num = form.room_num.data
+        room.beds = form.beds.data
+        beds = room.beds
+        bed=f'{hostel_name}{beds}'
+        price = Beds.query.filter_by(beds_id=bed).first()
+        room.price=price.price
+        db.session.commit()
+        form.room_num.data = room.room_num
+        form.beds.data = int(room.beds)
+        flash('Room Sucessfully Updated!', 'success')
+        return redirect(url_for('room_details', id = room.room_num))
+      elif request.method == 'GET':
+        form.room_num.data = room.room_num
+        form.beds.data = int(room.beds)
+        table = TotalStudentsReport(room.occupants)
+      return render_template('room_details.html', legend='Edit Room',form=form,form2=form2,table=table, room = room)
+  else:
+      return render_template('logInError.html')
 
 
 @app.route('/admin/viewrooms/room_details/<string:id>/delete', methods=['POST'])
 @login_required
 def deleteroom(id):
-  hostel_id = current_user.hostel_id
-  room = Room.query.filter_by(room_num = id, hostel_id = hostel_id).first()
-  return_url = request.referrer
-  if len(room.occupants) > 0:
-    flash('Room cannot be deleted. Check if room is empty', 'danger')
-    return redirect(return_url)
-  else:
-    db.session.delete(room)
-    db.session.commit()
-    flash('Room has been deleted!','success')
-    return redirect(url_for('viewrooms'))
+    if current_user.role == 'admin':
+      hostel_id = current_user.hostel_id
+      room = Room.query.filter_by(room_num = id, hostel_id = hostel_id).first()
+      return_url = request.referrer
+      if len(room.occupants) > 0:
+        flash('Room cannot be deleted. Check if room is empty', 'danger')
+        return redirect(return_url)
+      else:
+        db.session.delete(room)
+        db.session.commit()
+        flash('Room has been deleted!','success')
+        return redirect(url_for('viewrooms'))
+    else:
+        return render_template('logInError.html')
 
 
 @app.route("/admin/editroompricing", methods=['GET', 'POST'])
 @login_required
 def editroompricing():
-  form2 = AnnouncementForm()
-  form = EditRoomPricingForm()
-  if form.validate_on_submit():
-     beds = form.beds.data
-     price = form.price.data
-     hostel_id = current_user.hostel_id
-     db.engine.execute("Update beds set price = "+ str(price) +" where beds.bednum = " + str(beds) +" and beds.hostel_id = " + str(hostel_id))
-     db.engine.execute(
-       "Update rooms set price = " + str(price) + " where rooms.beds = " + str(beds) + " and rooms.hostel_id = " + str(
-         hostel_id))
-     flash('Room Pricing have been updated', 'success')
-     return redirect(url_for('editroompricing'))
+    if current_user.role == 'admin':
+      form2 = AnnouncementForm()
+      form = EditRoomPricingForm()
+      if form.validate_on_submit():
+         beds = form.beds.data
+         price = form.price.data
+         hostel_id = current_user.hostel_id
+         db.engine.execute("Update beds set price = "+ str(price) +" where beds.bednum = " + str(beds) +" and beds.hostel_id = " + str(hostel_id))
+         db.engine.execute(
+           "Update rooms set price = " + str(price) + " where rooms.beds = " + str(beds) + " and rooms.hostel_id = " + str(
+             hostel_id))
+         flash('Room Pricing have been updated', 'success')
+         return redirect(url_for('editroompricing'))
 
-  return render_template('edit_roompricing.html', form2 = form2, form = form, legend = "Edit Room Pricing")
+      return render_template('edit_roompricing.html', form2 = form2, form = form, legend = "Edit Room Pricing")
+    else:
+        return render_template('logInError.html')
 
 
 @app.route('/admin/payments',methods=['GET', 'POST'])
 @login_required
 def payments():
-    #page = request.args.get('page', 1, type=int)
-    form2 = AnnouncementForm()
-    payment = Images.query.filter_by(processed="False").order_by(Images.date_posted.desc()).all()#.paginate(page=page, per_page=6)
-    return render_template('payments.html', form2 = form2, payment=payment)
+    if current_user.role == 'admin':
+        #page = request.args.get('page', 1, type=int)
+        form2 = AnnouncementForm()
+        payment = Images.query.filter_by(processed="False").order_by(Images.date_posted.desc()).all()#.paginate(page=page, per_page=6)
+        return render_template('payments.html', form2 = form2, payment=payment, User = User)
+    else:
+        return render_template('logInError.html')
 
 @app.route('/admin/payments/<id>/input_payment', methods=['GET', 'POST'])
 @login_required
 def input_payment(id):
-  form = AdminAddPaymentForm()
-  form2 = AnnouncementForm()
-  image = Images.query.filter_by(image_id= id).first()
-  student_id = image.user_id
-  student = User.query.filter_by(id = student_id).first()
-  room = Room.query.filter_by(room_num = student.room_id).first()
-  room_price = room.price
-  if form.validate_on_submit():
-      if Payment.query.filter_by(user_id = student_id).order_by(Payment.payment_id.desc()).first():
-          prev_amountremaining = Payment.query.filter_by(user_id = student_id).order_by(Payment.payment_id.desc()).first()
-          input = Payment(user_id= student_id, amount_paid = prev_amountremaining.amount_paid + form.price.data, amount_remaining= prev_amountremaining.amount_remaining - form.price.data)
-          db.session.add(input)
-          db.session.delete(prev_amountremaining)
-          image.processed = "True"
-          db.session.commit()
-          flash('Payment has been added', 'success')
-          return redirect(url_for('input_payment', id = id))
-      else:
-          input = Payment(user_id=student_id, amount_paid=form.price.data,
-                          amount_remaining=room_price - form.price.data)
-          db.session.add(input)
-          image.processed = "True"
-          db.session.commit()
-          flash('Payment has been added', 'success')
-          return redirect(url_for('input_payment', id=id))
+    if current_user.role == 'admin':
+      form = AdminAddPaymentForm()
+      form2 = AnnouncementForm()
+      image = Images.query.filter_by(image_id= id).first()
+      student_id = image.user_id
+      student = User.query.filter_by(id = student_id).first()
+      room = Room.query.filter_by(room_num = student.room_id).first()
+      room_price = room.price
+      if form.validate_on_submit():
+          if Payment.query.filter_by(user_id = student_id).order_by(Payment.payment_id.desc()).first():
+              prev_amountremaining = Payment.query.filter_by(user_id = student_id).order_by(Payment.payment_id.desc()).first()
+              input = Payment(user_id= student_id, amount_paid = prev_amountremaining.amount_paid + form.price.data, amount_remaining= prev_amountremaining.amount_remaining - form.price.data)
+              db.session.add(input)
+              db.session.delete(prev_amountremaining)
+              image.processed = "True"
+              db.session.commit()
+              flash('Payment has been added', 'success')
+              return redirect(url_for('input_payment', id = id))
+          else:
+              input = Payment(user_id=student_id, amount_paid=form.price.data,
+                              amount_remaining=room_price - form.price.data)
+              db.session.add(input)
+              image.processed = "True"
+              db.session.commit()
+              flash('Payment has been added', 'success')
+              return redirect(url_for('input_payment', id=id))
 
-  return render_template('input_payments.html', form2=form2, form=form,
-          legend = "Input Payment for " + student.firstname + " " + student.lastname )
+      return render_template('input_payments.html', form2=form2, form=form,
+              legend = "Input Payment for " + student.firstname + " " + student.lastname )
+    else:
+        return render_template('logInError.html')
 
 
 @app.route('/admin/changepassword', methods=['GET','POST'])
 @login_required
 def change_Adminpassword():
-  form2 = AnnouncementForm()
-  form = ChangePasswordForm()
-  user = User.query.filter_by(id=current_user.id).first()
-  print(user.firstname)
-  if request.method == 'POST':
-    if form.validate_on_submit():
-        if bcrypt.check_password_hash(user.password, form.current_password.data):
-          hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
-          user.password = hashed_password
-          db.session.commit()
-          flash('Your password has been changed!', 'success')
-          return redirect(url_for('change_Adminpassword'))
-        else:
-          flash('Current password might be wrong', 'danger')
-          #return redirect(url_for('change_Adminpassword'))
-  return render_template('change_Adminpassword.html', form2=form2, form=form, legend = "Change Password")
+    if current_user.role == 'admin':
+      form2 = AnnouncementForm()
+      form = ChangePasswordForm()
+      user = User.query.filter_by(id=current_user.id).first()
+      if request.method == 'POST':
+        if form.validate_on_submit():
+            if bcrypt.check_password_hash(user.password, form.current_password.data):
+              hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+              user.password = hashed_password
+              db.session.commit()
+              flash('Your password has been changed!', 'success')
+              return redirect(url_for('change_Adminpassword'))
+            else:
+              flash('Current password might be wrong', 'danger')
+              return redirect(url_for('change_Adminpassword'))
+      return render_template('change_Adminpassword.html', form2=form2, form=form, legend = "Change Password")
+    else:
+        return render_template('logInError.html')
 
 
 @app.route('/admin/edithosteldetails', methods=['GET', 'POST'])
 @login_required
 def edit_hostelDetails():
-  form2 = AnnouncementForm()
-  form = EditHostelDetailsForm()
-  if form.validate_on_submit():
-    for item in tourContent:
-      if current_user.hostel_id == item['id']:
-        item['body'] = form.description.data
-        flash('Hostel description has been updated', 'success')
-        return redirect(url_for('edit_hostelDetails'))
-  elif request.method == 'GET':
-    for item in tourContent:
-      if current_user.hostel_id == item['id']:
-        form.description.data = item['body']
-  return render_template('edit_hostelDetails.html', form2=form2, form=form, legend = 'Edit Hostel Details')
+    if current_user.role == 'admin':
+      form2 = AnnouncementForm()
+      form = EditHostelDetailsForm()
+      if form.validate_on_submit():
+        for item in tourContent:
+          if current_user.hostel_id == item['id']:
+            item['body'] = form.description.data
+            flash('Hostel description has been updated', 'success')
+            return redirect(url_for('edit_hostelDetails'))
+      elif request.method == 'GET':
+        for item in tourContent:
+          if current_user.hostel_id == item['id']:
+            form.description.data = item['body']
+      return render_template('edit_hostelDetails.html', form2=form2, form=form, legend = 'Edit Hostel Details')
+    else:
+        return render_template('logInError.html')
 
 
 @app.route("/student")
 @login_required
 def student():
-  user = User.query.filter_by(id = current_user.id).first()
-  if user.hostel_id == None and user.room_id == None:
-    return render_template('firsttimehostelview.html', hostels=tourContent, user = user)
-  elif user.hostel_id != None and user.room_id == None:
-    hostel = Hostel.query.filter_by(hostel_id = user.hostel_id).first()
-    rooms = db.engine.execute("Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id == rooms.room_num) and hostel_id == " + str(hostel.hostel_id)).fetchall()
-    return render_template('book_a_room.html', rooms=rooms, user = user)
-  elif user.hostel_id != None and user.room_id != None:
-    ann_userId = User.query.filter_by(role = "admin", hostel_id = user.hostel_id).first()
-    announcements = Announcement.query.filter_by(user_id = ann_userId.id)
-    return render_template('student_announcement_page.html',user=user,announcement = announcements)
+    if current_user.role == 'student':
+      user = User.query.filter_by(id = current_user.id).first()
+      if user.hostel_id == None and user.room_id == None:
+        return render_template('firsttimehostelview.html', hostels=tourContent, user = user)
+      elif user.hostel_id != None and user.room_id == None:
+        hostel = Hostel.query.filter_by(hostel_id = user.hostel_id).first()
+        rooms = db.engine.execute("Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id == rooms.room_num) and hostel_id == " + str(hostel.hostel_id)).fetchall()
+        return render_template('book_a_room.html', rooms=rooms, user = user)
+      elif user.hostel_id != None and user.room_id != None:
+        ann_userId = User.query.filter_by(role = "admin", hostel_id = user.hostel_id).first()
+        announcements = Announcement.query.filter_by(user_id = ann_userId.id)
+        return render_template('student_announcement_page.html',user=user,announcement = announcements)
+
+    else:
+        return render_template('logInStudentError.html')
 
 
 @app.route("/student/<id>/picked_hostel")
 @login_required
 def picked_hostel(id):
-  user = User.query.filter_by(id=current_user.id).first()
-  hostelInfo = None
-  for hostel in tourContent:
-    if (hostel['id'] == int(id)):
-      hostelInfo = hostel
-  return render_template('selected_hostel.html', hostelInfo=hostelInfo, user = user)
+    if current_user.role == 'student':
+      user = User.query.filter_by(id=current_user.id).first()
+      hostelInfo = None
+      for hostel in tourContent:
+        if (hostel['id'] == int(id)):
+          hostelInfo = hostel
+      return render_template('selected_hostel.html', hostelInfo=hostelInfo, user = user)
+    else:
+        return render_template('logInStudentError.html')
 
 @app.route("/student/<id>/picked_hostel/selected", methods=['GET', 'POST'])
 @login_required
 def confirm_hostel(id):
-  user = User.query.filter_by(id=current_user.id).first()
-  user.hostel_id = int(id)
-  db.session.commit()
-  return redirect(url_for('student'))
+    if current_user.role == 'student':
+      user = User.query.filter_by(id=current_user.id).first()
+      user.hostel_id = int(id)
+      db.session.commit()
+      return redirect(url_for('student'))
+    else:
+        return render_template('logInStudentError.html')
 
 @app.route("/student/<id>/picked_room")
 @login_required
 def picked_room(id):
-  user = User.query.filter_by(id=current_user.id).first()
-  room = Room.query.filter_by(room_num = id).first()
-  table = TotalStudentsReport(room.occupants)
-  return render_template('selected_room.html', table= table, room = room, user = user)
+    if current_user.role == 'student':
+      user = User.query.filter_by(id=current_user.id).first()
+      room = Room.query.filter_by(room_num = id).first()
+      table = TotalStudentsReport(room.occupants)
+      return render_template('selected_room.html', table= table, room = room, user = user)
+    else:
+        return render_template('logInStudentError.html')
 
 @app.route("/student/<id>/picked_room/selected", methods=['GET', 'POST'])
 @login_required
 def confirm_room(id):
-  user = User.query.filter_by(id=current_user.id).first()
-  user.room_id = id
-  db.session.commit()
-  return redirect(url_for('student'))
+    if current_user.role == 'student':
+      user = User.query.filter_by(id=current_user.id).first()
+      user.room_id = id
+      db.session.commit()
+      return redirect(url_for('student'))
+    else:
+        return render_template('logInStudentError.html')
 
 
 def save_picture(form_picture):
@@ -440,35 +505,67 @@ def save_picture(form_picture):
 @app.route("/student/make_payment", methods=['GET', 'POST'])
 @login_required
 def student_payment():
-  form=StudentPaymentForm()
-  user = User.query.filter_by(id=current_user.id).first()
-  amount_remaining=1000
-  if form.validate_on_submit():
-    if form.receipt.data:
-      picture_file = save_picture(form.receipt.data)
-      image=Images(image_file=picture_file,user_id=current_user.id)
-      image_name=image.image_file
-      db.session.add(image)
-      db.session.commit()
-      flash('Receipt successfully sent, wait for confirmation from your Hostel Admin', 'success')
-      return redirect(url_for('student_payment'))
-    elif request.method == 'GET':
-      form.receipt.data = None
-  return render_template('student_payment.html',user=user,form=form,amount_remaining=amount_remaining)
+    if current_user.role == 'student':
+      form=StudentPaymentForm()
+      user = User.query.filter_by(id=current_user.id).first()
+      amount_remaining=1000
+      if form.validate_on_submit():
+        if form.receipt.data:
+          picture_file = save_picture(form.receipt.data)
+          image=Images(image_file=picture_file,user_id=current_user.id)
+          image_name=image.image_file
+          db.session.add(image)
+          db.session.commit()
+          flash('Receipt successfully sent, wait for confirmation from your Hostel Admin', 'success')
+          return redirect(url_for('student_payment'))
+        elif request.method == 'GET':
+          form.receipt.data = None
+      return render_template('student_payment.html',user=user,form=form,amount_remaining=amount_remaining)
+    else:
+        return render_template('logInStudentError.html')
 
 
 @app.route("/student/view_room", methods=['GET', 'POST'])
 @login_required
 def student_viewroom():
-  user = User.query.filter_by(id=current_user.id).first()
-  room = Room.query.filter_by(room_num=current_user.room_id).first()
-  table = TotalStudentsReport(room.occupants)
-  return render_template('student_viewroom.html', table=table, room=room, user=user)
+    if current_user.role == 'student':
+      user = User.query.filter_by(id=current_user.id).first()
+      room = Room.query.filter_by(room_num=current_user.room_id).first()
+      table = TotalStudentsReport(room.occupants)
+      return render_template('student_viewroom.html', table=table, room=room, user=user)
+    else:
+        return render_template('logInStudentError.html')
 
 @app.route("/student/view_room/leave_room", methods=['GET', 'POST'])
 @login_required
 def student_leaveroom():
-  user = User.query.filter_by(id=current_user.id).first()
-  user.room_id = None
-  db.session.commit()
-  return redirect(url_for('student'))
+    if current_user.role == 'student':
+      user = User.query.filter_by(id=current_user.id).first()
+      user.room_id = None
+      db.session.commit()
+      return redirect(url_for('student'))
+    else:
+        return render_template('logInStudentError.html')
+
+@app.route("/student/account", methods=['GET', 'POST'])
+@login_required
+def updatestudentaccount():
+    if current_user.role == 'student':
+        form = UpdateAccountForm()
+        user = User.query.filter_by(id=current_user.id).first()
+        if form.validate_on_submit():
+            current_user.firstname = form.firstname.data
+            current_user.lastname = form.lastname.data
+            current_user.number = form.number.data
+            current_user.email = form.email.data
+            db.session.commit()
+            flash('Your account has been updated!', 'success')
+            return redirect(url_for('updatestudentaccount'))
+        elif request.method == 'GET':
+            form.firstname.data = current_user.firstname
+            form.lastname.data = current_user.lastname
+            form.number.data = current_user.number
+            form.email.data = current_user.email
+        return render_template('update_studentAccount.html', title='Account', form=form, user = user)
+    else:
+        return render_template('logInStudentError.html')

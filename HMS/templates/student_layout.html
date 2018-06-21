@@ -20,7 +20,7 @@
         <!--Navigation Bar-->
         <nav class="navbar navbar-expand-lg navbar-light navbar-fixed-top" id="mainNav">
             <div class="container">
-                <a href="#"> <img class="icon navbar-brand js-scroll-trigger" src="/static/img/whitelogo.png" alt="HMS icon" href="#"> </a>
+                <a href="#"> <img class="icon navbar-brand js-scroll-trigger" src="/static/img/whitelogo.png" alt="HMS icon" href="{{ url_for('student') }}"> </a>
                 <button class="navbar-toggler navbar-dark navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
                   <span class="navbar-toggler-icon"></span>
                 </button>
@@ -43,7 +43,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Account</a>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" href="{{ url_for('updateaccount') }}">Edit Personal Details</a>
+                                <a class="dropdown-item" href="{{ url_for('updatestudentaccount') }}">Edit Personal Details</a>
                                 <a class="dropdown-item" href="#">Change Password</a>
                                 {% if user.hostel_id != None and user.room_id == None %}
                                     <a class="dropdown-item" href="#">Leave Hostel</a>
