@@ -547,6 +547,9 @@ def student_leaveroom():
     else:
         return render_template('logInStudentError.html')
 
+
+
+
 @app.route("/student/account", methods=['GET', 'POST'])
 @login_required
 def updatestudentaccount():
@@ -567,5 +570,16 @@ def updatestudentaccount():
             form.number.data = current_user.number
             form.email.data = current_user.email
         return render_template('update_studentAccount.html', title='Account', form=form, user = user)
+    else:
+        return render_template('logInStudentError.html')
+
+@app.route("/student/account/leave_hostel")
+@login_required
+def student_leavehostel():
+    if current_user.role == 'student':
+      user = User.query.filter_by(id=current_user.id).first()
+      user.hostel_id = None
+      db.session.commit()
+      return redirect(url_for('student'))
     else:
         return render_template('logInStudentError.html')
