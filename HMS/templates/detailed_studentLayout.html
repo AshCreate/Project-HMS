@@ -32,11 +32,6 @@
                         <li class="nav-item">
                           <a class="nav-link js-scroll-trigger text-dark" href="{{ url_for('student') }}">Home</a>
                         </li>
-                        {% if user.hostel_id != None and user.room_id == None %}
-                            <li class="nav-item">
-                              <a class="nav-link js-scroll-trigger text-dark" href="#">Book Room</a>
-                            </li>
-                        {% endif %}
                         {% if user.hostel_id != None and user.room_id != None %}
                             <li class="nav-item">
                               <a class="nav-link js-scroll-trigger text-dark" href="{{ url_for('student_viewroom') }}">View Room</a>
