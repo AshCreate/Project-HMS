@@ -35,6 +35,7 @@ class Room(db.Model):
     price = db.Column(db.Integer)
     hostel_id = db.Column(db.Integer, db.ForeignKey('hostels.hostel_id'))
     occupants = db.relationship('User', backref='room')
+    room_gen = db.Column(db.String, nullable= False)
 
     def __repr__(self):
         return f"Room('{self.room_num}', '{self.hostel_id}')"
@@ -58,6 +59,8 @@ class Hostel(db.Model):
     occupants = db.relationship('User', backref='hostel')
     rooms = db.relationship('Room', backref='hostel')
     beds = db.relationship('Beds', backref='hostel')
+    desc = db.Column(db.Text, nullable=False)
+    img = db.Column(db.String, nullable=False)
 
     def __repr__(self):
         return f"Hostel('{self.hostel_id}', '{self.hostel_name}')"
