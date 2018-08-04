@@ -130,9 +130,10 @@ def addroom():
             hostel_name = Hostel.query.filter_by(hostel_id=hostel_id).first()
             hostel_name = hostel_name.hostel_name.lower()
             bed = f'{hostel_name}{beds}'
-            price = Beds.query.filter_by(beds_id=bed).first()
-            price = price.price
-            room = Room(room_num=room_num, beds=beds, price=price, hostel_id=current_user.hostel_id)
+            spec_bed = Beds.query.filter_by(beds_id=bed).first()
+            price = spec_bed.price
+            room_gen = form.gender.data
+            room = Room(room_num=room_num, beds=beds, price=price, hostel_id=current_user.hostel_id, room_gen= room_gen)
             db.session.add(room)
             db.session.commit()
             flash('Room successfully added', 'success')
@@ -226,7 +227,7 @@ def detailed_report(id):
         if (id == 'totNotFullPaid'):
             table = TotalFullPaidStudentsReport(db.engine.execute(
                 "SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining" +
-                " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining>0 and Users.hostel_id == " + str(
+                " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining > 0 and Users.hostel_id == " + str(
                     hostel.hostel_id)))
             return render_template('detailed_reports.html', table=table)
         if (id == 'totFullRooms'):
@@ -284,6 +285,8 @@ def room_details(id):
             bed = f'{hostel_name}{beds}'
             price = Beds.query.filter_by(beds_id=bed).first()
             room.price = price.price
+            room_gen = form.gender.data
+            room.room_gen = room_gen
             db.session.commit()
             form.room_num.data = room.room_num
             form.beds.data = int(room.beds)
@@ -292,6 +295,7 @@ def room_details(id):
         elif request.method == 'GET':
             form.room_num.data = room.room_num
             form.beds.data = int(room.beds)
+            form.gender.data = str(room.room_gen[0])
             table = TotalStudentsReport(room.occupants)
         return render_template('room_details.html', legend='Edit Room', form=form, table=table, room=room)
     else:
@@ -333,7 +337,6 @@ def editroompricing():
                     beds) + " and rooms.hostel_id = " + str(
                     hostel_id))
             flash('Room Pricing have been updated', 'success')
-            print('***************************************************************')
             return redirect(url_for('editroompricing'))
 
         return render_template('edit_roompricing.html', form=form, legend="Edit Room Pricing")
@@ -419,34 +422,20 @@ def change_Adminpassword():
 def edit_hostelDetails():
     if current_user.role == 'admin':
         form = EditHostelDetailsForm()
+        hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
         if request.method == 'GET':
-            for item in tourContent:
-                if current_user.hostel_id == item['id']:
-                    form.description.data = item['body']
-        # if form.validate_on_submit():
-        #     print('**********************validated this form***********************')
-        #     for item in tourContent:
-        #         if current_user.hostel_id == item['id']:
-        #             item['body'] = form.description.data
-        #             flash('Hostel description has been updated', 'success')
-        #             return redirect(url_for('edit_hostelDetails'))
-        #             break
-        #
+
+            hostel_details = hostel.desc
+            form.description.data = hostel_details
+
         if request.method == 'POST':
-            if form.validate():
-            #if str(form.description.data).__len__() > 1:
-                #print('**********************validated this form***********************')
-                for item in tourContent:
-                    if current_user.hostel_id == item['id']:
-                        item['body'] = form.description.data
-                        flash('Hostel description has been updated', 'success')
-                        return redirect(url_for('edit_hostelDetails'))
-                        break
+            if form.validate_on_submit():
+                hostel.desc = form.description.data
+                db.session.commit()
+                flash('Hostel description has been updated', 'success')
+                return redirect(url_for('edit_hostelDetails'))
             else:
                 flash('Failed validation','danger')
-        #
-        # else:
-        #     return render_template('logInError.html')
         return render_template('edit_hostelDetails.html', form=form, legend='Edit Hostel Details')
     else:
         return render_template('logInError.html')
@@ -457,15 +446,15 @@ def edit_hostelDetails():
 def admin_announce():
     form = AnnouncementForm()
     if request.method == 'POST':
-        #if form.validate():
-        new_announce = Announcement(subject=form.subject.data, message=form.message.data, user_id=current_user.id)
-        db.session.add(new_announce)
-        db.session.commit()
+        if form.validate_on_submit():
+            new_announce = Announcement(subject=form.subject.data, message=form.message.data, user_id=current_user.id)
+            db.session.add(new_announce)
+            db.session.commit()
         # db.engine.execute(
         #     "insert into announcements subject, message, user_id values (" +
         #     form2.subject.data + "," + form2.message.data + "," + current_user.id + ")")
-        flash('Announcement has been made', 'success')
-        return redirect(url_for('admin_announce'))
+            flash('Announcement has been made', 'success')
+            return redirect(url_for('admin_announce'))
     return render_template('admin_announce.html', form2=form)
 
 
@@ -635,3 +624,25 @@ def student_leavehostel():
         return redirect(url_for('student'))
     else:
         return render_template('logInStudentError.html')
+
+@app.route('/student/changepassword', methods=['GET', 'POST'])
+@login_required
+def change_Studentpassword():
+    if current_user.role == 'student':
+
+        form = ChangePasswordForm()
+        user = User.query.filter_by(id=current_user.id).first()
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                if bcrypt.check_password_hash(user.password, form.current_password.data):
+                    hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+                    user.password = hashed_password
+                    db.session.commit()
+                    flash('Your password has been changed!', 'success')
+                    return redirect(url_for('change_Studentpassword'))
+                else:
+                    flash('Current password might be wrong', 'danger')
+                    return redirect(url_for('change_Studentpassword'))
+        return render_template('change_Studentpassword.html', form=form, legend="Change Password")
+    else:
+        return render_template('logInError.html')

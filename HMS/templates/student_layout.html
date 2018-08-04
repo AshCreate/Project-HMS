@@ -32,7 +32,7 @@
                         <li class="nav-item">
                           <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('student') }}">Home</a>
                         </li>
-                        {% if user.hostel_id != None and user.room_id != None %}
+                        {% if current_user.hostel_id != None and current_user.room_id != None %}
                             <li class="nav-item">
                               <a class="nav-link js-scroll-trigger text-white" href="{{ url_for('student_viewroom') }}">View Room</a>
                             </li>
@@ -44,8 +44,8 @@
                             <a class="nav-link dropdown-toggle text-white" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Account</a>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="{{ url_for('updatestudentaccount') }}">Edit Personal Details</a>
-                                <a class="dropdown-item" href="#">Change Password</a>
-                                {% if user.hostel_id != None and user.room_id == None %}
+                                <a class="dropdown-item" href="{{ url_for('change_Studentpassword') }}">Change Password</a>
+                                {% if current_user.hostel_id != None and current_user.room_id == None %}
                                     <a class="dropdown-item" href="{{ url_for('student_leavehostel') }}">Leave Hostel</a>
                                 {% endif %}
                                 <div class="dropdown-divider"></div>

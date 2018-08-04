@@ -48,6 +48,8 @@ class AddRoomForm(FlaskForm):
                                                                ('2', 'Two in a room'),
                                                                ('3', 'Three in a room'),
                                                                ('4', 'Four in a room')])
+    gender = SelectField('Gender', choices=[('M', 'Male'),
+                                            ('F', 'Female')])
     submit = SubmitField('Add Room')
 
 
@@ -57,6 +59,8 @@ class EditRoomForm(FlaskForm):
                                                                (2, 'Two in a room'),
                                                                (3, 'Three in a room'),
                                                                (4, 'Four in a room')], coerce=int)
+    gender = SelectField('Gender', choices=[('M', 'Male'),
+                                            ('F', 'Female')])
     submit = SubmitField('Update Room')
 
 
@@ -106,7 +110,7 @@ class ChangePasswordForm(FlaskForm):
 
 
 class EditHostelDetailsForm(FlaskForm):
-    description = TextAreaField('Hostel Description', validators=[DataRequired()])
+    description = TextAreaField('Hostel Description',render_kw={"rows": 10, "cols": 11}, validators=[DataRequired()])
     submit = SubmitField('Update Hostel Details')
 
 
