@@ -1,6 +1,6 @@
 import os
 import secrets
-from PIL import *
+from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
@@ -85,30 +85,26 @@ def admin():
         hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
         hostelName = hostel.hostel_name
         totalNumOfRooms = len(hostel.rooms)
-        totalNumofStudents = 0
-        totalNumOfMales = 0
-        totalNumOfFemales = 0
+        totalNumofStudents = db.engine.execute(
+                "select count(*) from Users where room_id not null and users.hostel_id == " + str(hostel.hostel_id)).fetchone()[0]
+        totalNumOfMales = db.engine.execute(
+                "select count(*) from Users where gender == 'M' and room_id not null and hostel_id == " + str(
+                    hostel.hostel_id)).fetchone()[0]
+        totalNumOfFemales = db.engine.execute(
+                "select count(*) from Users where gender == 'F' and room_id not null and hostel_id == " + str(
+                    hostel.hostel_id)).fetchone()[0]
+
+        fullyOccupiedRooms = db.engine.execute(
+            "Select count(*) from rooms where hostel_id = " + str(
+                hostel.hostel_id) + " and rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num)").fetchone()[0]
+
         totalNumofFullyPaid = 0
-
-        for student in hostel.occupants:
-            if student.room_id != None:
-                totalNumofStudents += 1
-            if student.gender == 'M' and student.room_id != None:
-                totalNumOfMales += 1
-            elif student.gender == 'F' and student.room_id != None:
-                totalNumOfFemales += 1
-
-        fullyOccupiedRooms = 0
-        occupied_rooms = db.engine.execute(
-            "Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " + str(
-                hostel.hostel_id))
-        for room in occupied_rooms:
-            fullyOccupiedRooms += 1
-
-        for payment in Payment.query.all():
-            if payment.amount_remaining == 0:
-                totalNumofFullyPaid += 1
-
+        num = db.engine.execute(
+                "SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining" +
+                " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining <= 0 and Users.hostel_id == " + str(
+                    hostel.hostel_id))
+        for _ in num:
+            totalNumofFullyPaid += 1
         return render_template('admin_home.html', hostelName=hostelName, totalNumOfRooms=totalNumOfRooms,
                                totalNumofStudents=totalNumofStudents, fullyOccupiedRooms=fullyOccupiedRooms,
                                totalNumOfFemales=totalNumOfFemales,
@@ -284,14 +280,18 @@ def room_details(id):
             beds = room.beds
             bed = f'{hostel_name}{beds}'
             price = Beds.query.filter_by(beds_id=bed).first()
-            room.price = price.price
-            room_gen = form.gender.data
-            room.room_gen = room_gen
-            db.session.commit()
-            form.room_num.data = room.room_num
-            form.beds.data = int(room.beds)
-            flash('Room Sucessfully Updated!', 'success')
-            return redirect(url_for('room_details', id=room.room_num))
+            if len(room.occupants) <= room.beds:
+                room.price = price.price
+                room_gen = form.gender.data
+                room.room_gen = room_gen
+                db.session.commit()
+                form.room_num.data = room.room_num
+                form.beds.data = int(room.beds)
+                flash('Room Sucessfully Updated!', 'success')
+                return redirect(url_for('room_details', id=room.room_num))
+            else:
+                flash('Invalid action. Number of beds cannot be less than number of occupants in a room', 'danger')
+                return redirect(url_for('room_details', id=room.room_num))
         elif request.method == 'GET':
             form.room_num.data = room.room_num
             form.beds.data = int(room.beds)
