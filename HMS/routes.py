@@ -16,7 +16,13 @@ from HMS.tables import TotalRoomReport, TotalStudentsReport, TotalFullPaidStuden
 @app.route("/")
 @app.route("/home")
 def home():
-    return render_template('Home.html')
+    if current_user.is_authenticated:
+        if current_user.role == "student":
+            return redirect(url_for('student'))
+        elif current_user.role == "admin":
+            return redirect(url_for('admin'))
+    else:
+        return render_template('Home.html')
 
 
 @app.route("/login", methods=['GET', 'POST'])
