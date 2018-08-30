@@ -106,7 +106,7 @@ def admin():
 
         fullyOccupiedRooms = 0
         occupied_rooms = db.engine.execute(
-            "Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " + str(
+            "Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id = rooms.room_num) and rooms.hostel_id = " + str(
                 hostel.hostel_id))
         for room in occupied_rooms:
             fullyOccupiedRooms += 1
@@ -471,7 +471,7 @@ def student():
         elif user.hostel_id != None and user.room_id == None:
             hostel = Hostel.query.filter_by(hostel_id=user.hostel_id).first()
             rooms = db.engine.execute(
-                "Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id == rooms.room_num) and hostel_id == " + str(
+                "Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id = rooms.room_num) and hostel_id = " + str(
                     hostel.hostel_id)).fetchall()
             return render_template('book_a_room.html', rooms=rooms, user=user)
         elif user.hostel_id != None and user.room_id != None:

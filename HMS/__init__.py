@@ -7,7 +7,8 @@ from flask import session, app
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '82d4a58e933d7ae2463b9fc1486a15e5'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:''@localhost/hms'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:mymummy28@localhost/hms'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
@@ -22,7 +23,7 @@ login_manager.login_message_category = 'info'
 @app.before_request
 def make_session_permanent():
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=60)
+    app.permanent_session_lifetime = timedelta(minutes=1)
 
 
 from HMS import routes
