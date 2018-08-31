@@ -5,7 +5,6 @@ from flask import render_template, url_for, flash, redirect, request, abort
 from HMS import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
 from HMS.models import User, Hostel, Payment, Room, Beds, Images, Announcement
-from HMS.static.tourcontent import tourContent
 from HMS.static.reportContent import reportContent
 from HMS.forms import SignupForm, LoginForm, AnnouncementForm, AddRoomForm, EditRoomForm, \
     UpdateAccountForm, EditRoomPricingForm, AdminAddPaymentForm, ChangePasswordForm, EditHostelDetailsForm, \
@@ -16,7 +15,13 @@ from HMS.tables import TotalRoomReport, TotalStudentsReport, TotalFullPaidStuden
 @app.route("/")
 @app.route("/home")
 def home():
-    return render_template('Home.html')
+    if current_user.is_authenticated:
+        if current_user.role == "student":
+            return redirect(url_for('student'))
+        elif current_user.role == "admin":
+            return redirect(url_for('admin'))
+    else:
+        return render_template('Home.html')
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -75,7 +80,8 @@ def about():
 
 @app.route("/tour")
 def tour():
-    return render_template('tour.html', title="Take A Tour", tourContent=tourContent)
+    hostel = Hostel.query.all()
+    return render_template('tour.html', title="Take A Tour", hostel = hostel)
 
 
 @app.route("/admin", methods=['GET', 'POST'])
@@ -85,37 +91,32 @@ def admin():
         hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
         hostelName = hostel.hostel_name
         totalNumOfRooms = len(hostel.rooms)
-        totalNumofStudents = 0
-        totalNumOfMales = 0
-        totalNumOfFemales = 0
+        totalNumofStudents = db.engine.execute(
+           "select count(*) from Users where room_id is not null and users.hostel_id = " + str(hostel.hostel_id)).fetchone()[0]
+        totalNumOfMales = db.engine.execute(
+                                           "select count(*) from Users where gender = 'M' and room_id is not null and hostel_id = " + str(
+                                                                                                                                         hostel.hostel_id)).fetchone()[0]
+        totalNumOfFemales = db.engine.execute(
+                                             "select count(*) from Users where gender = 'F' and room_id is not null and hostel_id = " + str(
+                                                                                                                                           hostel.hostel_id)).fetchone()[0]
+       
+        fullyOccupiedRooms = db.engine.execute(
+                                              "Select count(*) from rooms where hostel_id = " + str(
+                                                                                                    hostel.hostel_id) + " and rooms.beds = (select count(*) from Users where users.room_id = rooms.room_num)").fetchone()[0]
+       
         totalNumofFullyPaid = 0
-
-        for student in hostel.occupants:
-            if student.room_id != None:
-                totalNumofStudents += 1
-            if student.gender == 'M' and student.room_id != None:
-                totalNumOfMales += 1
-            elif student.gender == 'F' and student.room_id != None:
-                totalNumOfFemales += 1
-
-        fullyOccupiedRooms = 0
-        occupied_rooms = db.engine.execute(
-            "Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " + str(
-                hostel.hostel_id))
-        for room in occupied_rooms:
-            fullyOccupiedRooms += 1
-
-        for payment in Payment.query.all():
-            if payment.amount_remaining == 0:
-                totalNumofFullyPaid += 1
-
+        num = db.engine.execute(
+                               "SELECT Users.firstname, Users.lastname,Users.email,Users.number,Payments.amount_paid,Payments.amount_remaining" +
+                               " FROM Users INNER JOIN Payments ON Payments.user_id = Users.id where Payments.amount_remaining <= 0 and Users.hostel_id = " + str(
+                                                                                                                                                                   hostel.hostel_id))
+        for _ in num:
+            totalNumofFullyPaid += 1
         return render_template('admin_home.html', hostelName=hostelName, totalNumOfRooms=totalNumOfRooms,
-                               totalNumofStudents=totalNumofStudents, fullyOccupiedRooms=fullyOccupiedRooms,
-                               totalNumOfFemales=totalNumOfFemales,
-                               totalNumOfMales=totalNumOfMales, totalNumofFullyPaid=totalNumofFullyPaid)
+                              totalNumofStudents=totalNumofStudents, fullyOccupiedRooms=fullyOccupiedRooms,
+                              totalNumOfFemales=totalNumOfFemales,
+                              totalNumOfMales=totalNumOfMales, totalNumofFullyPaid=totalNumofFullyPaid)
     else:
         return render_template('logInError.html')
-
 
 @app.route("/admin/addroom", methods=['GET', 'POST'])
 @login_required
@@ -129,7 +130,7 @@ def addroom():
             hostel_id = current_user.hostel_id
             hostel_name = Hostel.query.filter_by(hostel_id=hostel_id).first()
             hostel_name = hostel_name.hostel_name.lower()
-            bed = f'{hostel_name}{beds}'
+            bed = hostel_name + beds
             spec_bed = Beds.query.filter_by(beds_id=bed).first()
             price = spec_bed.price
             room_gen = form.gender.data
@@ -152,7 +153,7 @@ def occupants_details():
 
         hostel = Hostel.query.filter_by(hostel_id=current_user.hostel_id).first()
         table = TotalStudentsReport(
-            db.engine.execute("select * from Users where room_id not null and hostel_id == " + str(hostel.hostel_id)))
+            db.engine.execute("select * from Users where room_id is not null and hostel_id = " + str(hostel.hostel_id)))
         return render_template('occupants_details.html', title='Occupants Details',
                                table=table)
     else:
@@ -216,7 +217,7 @@ def detailed_report(id):
             return render_template('detailed_reports.html', table=table)
         if (id == 'totStu'):
             table = TotalStudentsReport(db.engine.execute(
-                "select * from Users where room_id not null and users.hostel_id == " + str(hostel.hostel_id)))
+                "select * from Users where room_id is not null and users.hostel_id = " + str(hostel.hostel_id)))
             return render_template('detailed_reports.html', table=table)
         if (id == 'totStuPaid'):
             table = TotalFullPaidStudentsReport(db.engine.execute(
@@ -232,22 +233,22 @@ def detailed_report(id):
             return render_template('detailed_reports.html', table=table)
         if (id == 'totFullRooms'):
             table = TotalRoomReport(db.engine.execute(
-                "Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " + str(
+                "Select * from rooms where rooms.beds = (select count(*) from Users where users.room_id = rooms.room_num) and rooms.hostel_id = " + str(
                     hostel.hostel_id)))
             return render_template('detailed_reports.html', table=table)
         if (id == 'totNotFullRooms'):
             table = TotalRoomReport(db.engine.execute(
-                "Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id == rooms.room_num) and rooms.hostel_id == " + str(
+                "Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id = rooms.room_num) and rooms.hostel_id = " + str(
                     hostel.hostel_id)))
             return render_template('detailed_reports.html', table=table)
         if (id == 'totMaleStu'):
             table = TotalStudentsReport(db.engine.execute(
-                "select * from Users where gender == 'M' and room_id not null and hostel_id == " + str(
+                "select * from Users where gender = 'M' and room_id is not null and hostel_id = " + str(
                     hostel.hostel_id)))
             return render_template('detailed_reports.html', table=table)
         if (id == 'totFemStu'):
             table = TotalStudentsReport(db.engine.execute(
-                "select * from Users where gender == 'F' and room_id not null and hostel_id == " + str(
+                "select * from Users where gender = 'F' and room_id is not null and hostel_id = " + str(
                     hostel.hostel_id)))
             return render_template('detailed_reports.html', table=table)
     else:
@@ -282,7 +283,7 @@ def room_details(id):
             room.room_num = form.room_num.data
             room.beds = form.beds.data
             beds = room.beds
-            bed = f'{hostel_name}{beds}'
+            bed = hostel_name + beds
             price = Beds.query.filter_by(beds_id=bed).first()
             room.price = price.price
             room_gen = form.gender.data
@@ -450,9 +451,6 @@ def admin_announce():
             new_announce = Announcement(subject=form.subject.data, message=form.message.data, user_id=current_user.id)
             db.session.add(new_announce)
             db.session.commit()
-        # db.engine.execute(
-        #     "insert into announcements subject, message, user_id values (" +
-        #     form2.subject.data + "," + form2.message.data + "," + current_user.id + ")")
             flash('Announcement has been made', 'success')
             return redirect(url_for('admin_announce'))
     return render_template('admin_announce.html', form2=form)
@@ -464,11 +462,11 @@ def student():
     if current_user.role == 'student':
         user = User.query.filter_by(id=current_user.id).first()
         if user.hostel_id == None and user.room_id == None:
-            return render_template('firsttimehostelview.html', hostels=tourContent, user=user)
+            return render_template('firsttimehostelview.html', hostels=Hostel.query.all(), user=user)
         elif user.hostel_id != None and user.room_id == None:
             hostel = Hostel.query.filter_by(hostel_id=user.hostel_id).first()
             rooms = db.engine.execute(
-                "Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id == rooms.room_num) and hostel_id == " + str(
+                "Select * from rooms where rooms.beds != (select count(*) from Users where users.room_id = rooms.room_num) and hostel_id = " + str(
                     hostel.hostel_id)).fetchall()
             return render_template('book_a_room.html', rooms=rooms, user=user)
         elif user.hostel_id != None and user.room_id != None:
@@ -524,6 +522,8 @@ def confirm_room(id):
     if current_user.role == 'student':
         user = User.query.filter_by(id=current_user.id).first()
         user.room_id = id
+        room = Room.query.filter_by(room_num = id).first()
+        room.room_gen = user.gender
         db.session.commit()
         return redirect(url_for('student'))
     else:
@@ -537,7 +537,7 @@ def save_picture(form_picture):
     picture_path = os.path.join(app.root_path, 'static/payments', picture_fn)
 
     output_size = (125, 125)
-    i = Image.open(form_picture)
+    i = open(form_picture)
     i.save(picture_path)
 
     return picture_fn
