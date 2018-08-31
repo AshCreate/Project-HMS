@@ -36,6 +36,7 @@
 
                 <div class = "form-group" >
                     {{form.gender.label(class="form-control-label")}}
+                    {{ form.csrf_token }}
                     {%if form.gender.errors%}
                         {{form.gender(class="form-control form-control-lg is-invalid")}}
                         <div class = "invalid-feedback">
